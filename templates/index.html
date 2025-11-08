@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Journey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --cosmic-dark: #0a0e27;
+            --cosmic-deep: #1a1d3a;
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff00e5;
+            --neon-yellow: #ffd500;
+            --star-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--cosmic-dark);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Animated starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background-image:
+                radial-gradient(2px 2px at 20% 30%, white, transparent),
+                radial-gradient(2px 2px at 60% 70%, white, transparent),
+                radial-gradient(1px 1px at 50% 50%, white, transparent),
+                radial-gradient(1px 1px at 80% 10%, white, transparent),
+                radial-gradient(2px 2px at 90% 60%, white, transparent),
+                radial-gradient(1px 1px at 33% 80%, white, transparent);
+            background-size: 200% 200%;
+            background-position: 0% 0%;
+            opacity: 0.6;
+            animation: twinkle 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translate(-5%, -5%) rotate(180deg);
+                opacity: 0.3;
+            }
+        }
+
+        #map-view,
+        #level-view {
+            position: relative;
+            z-index: 1;
+        }
+
+        #map-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px 80px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.3rem;
+            margin-bottom: 60px;
+            animation: glow-pulse 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                filter: brightness(1);
+            }
+
+            50% {
+                filter: brightness(1.3);
+            }
+        }
+
+        .road-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Winding path SVG */
+        .path-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .level-node {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 40px auto;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .level-node:nth-child(even) {
+            transform: translateX(80px);
+        }
+
+        .level-node:nth-child(odd) {
+            transform: translateX(-80px);
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(var(--x-offset, 0));
+            }
+
+            50% {
+                transform: translateY(-15px) translateX(var(--x-offset, 0));
+            }
+        }
+
+        .level-node:nth-child(even) {
+            --x-offset: 80px;
+        }
+
+        .level-node:nth-child(odd) {
+            --x-offset: -80px;
+        }
+
+        .level-node:hover {
+            transform: scale(1.2) translateX(var(--x-offset, 0));
+            filter: brightness(1.3);
+            z-index: 10;
+        }
+
+        .level-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cosmic-deep), #2a3d5f);
+            border: 4px solid var(--neon-cyan);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 0 30px rgba(0, 240, 255, 0.6),
+                inset 0 0 20px rgba(0, 240, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        .level-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--star-white);
+            text-shadow: 0 0 15px var(--neon-cyan);
+            z-index: 1;
+        }
+
+        .level-label {
+            font-size: 0.75rem;
+            color: var(--neon-yellow);
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            z-index: 1;
+            margin-top: 5px;
+        }
+
+        /* Level View Styles */
+        #level-view {
+            display: none;
+            min-height: 100vh;
+        }
+
+        #level-view.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--cosmic-deep), #0f1328);
+            border-right: 2px solid var(--neon-cyan);
+            padding: 40px 30px;
+            box-shadow: 5px 0 30px rgba(0, 240, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .sidebar h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, var(--neon-magenta), #c000a8);
+            border: none;
+            color: white;
+            padding: 18px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15rem;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgba(255, 0, 229, 0.6);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-button::before {
+            content: '← ';
+            margin-right: 8px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 30px rgba(255, 0, 229, 0.8);
+        }
+
+        .level-content {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .level-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-yellow), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                filter: brightness(1) drop-shadow(0 0 20px rgba(255, 213, 0, 0.5));
+            }
+
+            50% {
+                filter: brightness(1.4) drop-shadow(0 0 40px rgba(255, 213, 0, 0.8));
+            }
+        }
+
+        .level-message {
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .level-node {
+                width: 90px;
+                height: 90px;
+            }
+
+            .level-number {
+                font-size: 2rem;
+            }
+
+            .sidebar {
+                width: 200px;
+                padding: 20px;
+            }
+
+            .level-title {
+                font-size: 3rem;
+            }
+
+            .level-content {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map-view">
+        <h1>Onboard Journey</h1>
+        <div class="road-container">
+            <div class="level-node" onclick="goToLevel(1)">
+                <div class="level-circle">
+                    <div class="level-number">1</div>
+                    <div class="level-label">Start</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(2)">
+                <div class="level-circle">
+                    <div class="level-number">2</div>
+                    <div class="level-label">Nebula</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(3)">
+                <div class="level-circle">
+                    <div class="level-number">3</div>
+                    <div class="level-label">Asteroid</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(4)">
+                <div class="level-circle">
+                    <div class="level-number">4</div>
+                    <div class="level-label">Comet</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(5)">
+                <div class="level-circle">
+                    <div class="level-number">5</div>
+                    <div class="level-label">Planet</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(6)">
+                <div class="level-circle">
+                    <div class="level-number">6</div>
+                    <div class="level-label">Rings</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(7)">
+                <div class="level-circle">
+                    <div class="level-number">7</div>
+                    <div class="level-label">Moon</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(8)">
+                <div class="level-circle">
+                    <div class="level-number">8</div>
+                    <div class="level-label">Star</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(9)">
+                <div class="level-circle">
+                    <div class="level-number">9</div>
+                    <div class="level-label">Galaxy</div>
+                </div>
+            </div>
+            <div class="level-node" onclick="goToLevel(10)">
+                <div class="level-circle">
+                    <div class="level-number">10</div>
+                    <div class="level-label">Infinity</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="level-view">
+        <div class="sidebar">
+            <h2>Navigation</h2>
+            <button class="back-button" onclick="backToMap()">Return to Map</button>
+        </div>
+        <div class="level-content">
+            <div class="level-title" id="level-title">LEVEL 1</div>
+            <div class="level-message">You clicked on Level <span id="level-number-text">1</span></div>
+        </div>
+    </div>
+
+    <script>
+        function goToLevel(levelNum) {
+            document.getElementById('map-view').style.display = 'none';
+            document.getElementById('level-view').classList.add('active');
+            document.getElementById('level-title').textContent = `LEVEL ${levelNum}`;
+            document.getElementById('level-number-text').textContent = levelNum;
+        }
+
+        function backToMap() {
+            document.getElementById('level-view').classList.remove('active');
+            document.getElementById('map-view').style.display = 'flex';
+        }
+    </script>
+</body>
+
+</html>
