@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cosmic Journey</title>
+    <title>Welcome to the Team</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Exo+2:wght@400;600&display=swap"
         rel="stylesheet">
     <style>
@@ -15,6 +15,8 @@
             --neon-magenta: #ff00e5;
             --neon-yellow: #ffd500;
             --star-white: #ffffff;
+            --neon-green: #00ff6a;
+            /* Added green for completed paths */
         }
 
         * {
@@ -91,9 +93,17 @@
             background-clip: text;
             text-transform: uppercase;
             letter-spacing: 0.3rem;
-            margin-bottom: 60px;
+            margin-bottom: 20px;
             animation: glow-pulse 3s ease-in-out infinite;
             text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: var(--neon-cyan);
+            margin-bottom: 60px;
+            text-align: center;
+            letter-spacing: 0.1rem;
         }
 
         @keyframes glow-pulse {
@@ -118,13 +128,41 @@
         .path-line {
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
+            /* Changed from 50% and removed transform */
             width: 100%;
             height: 100%;
             pointer-events: none;
             z-index: 0;
         }
+
+        /* NEW: Styles for pending (cyan) and completed (green) paths */
+        .path-line path.pending {
+            fill: none;
+            stroke: var(--neon-cyan);
+            stroke-width: 4px;
+            stroke-dasharray: 10, 10;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 5px var(--neon-cyan));
+            animation: dash-animate 20s linear infinite;
+        }
+
+        .path-line path.completed {
+            fill: none;
+            stroke: var(--neon-green);
+            stroke-width: 4px;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 8px var(--neon-green));
+            stroke-dasharray: none;
+            /* Completed path is solid */
+        }
+
+        @keyframes dash-animate {
+            to {
+                stroke-dashoffset: -400;
+            }
+        }
+
 
         .level-node {
             position: relative;
@@ -161,6 +199,12 @@
         }
 
         .level-node:nth-child(odd) {
+            --x-offset: -80px;
+        }
+
+        /* Corrected the first child (odd) to have the correct offset */
+        .level-node:first-child {
+            transform: translateX(-80px);
             --x-offset: -80px;
         }
 
@@ -258,6 +302,38 @@
             text-shadow: 0 0 10px var(--neon-cyan);
         }
 
+        .progress-indicator {
+            background: rgba(26, 29, 58, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--neon-cyan);
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--neon-yellow);
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 240, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+            border-radius: 10px;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
         .back-button {
             background: linear-gradient(135deg, var(--neon-magenta), #c000a8);
             border: none;
@@ -295,16 +371,24 @@
             justify-content: center;
         }
 
+        .level-icon {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 20px var(--neon-cyan));
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
         .level-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 5rem;
+            font-size: 4rem;
             font-weight: 900;
             background: linear-gradient(135deg, var(--neon-yellow), var(--neon-magenta));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             animation: pulse-glow 2s ease-in-out infinite;
+            text-align: center;
         }
 
         @keyframes pulse-glow {
@@ -320,17 +404,109 @@
         }
 
         .level-message {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             color: var(--neon-cyan);
             text-align: center;
             font-weight: 600;
+            letter-spacing: 0.05rem;
+            margin-bottom: 40px;
+        }
+
+        .level-description {
+            background: linear-gradient(135deg, rgba(26, 29, 58, 0.8), rgba(42, 61, 95, 0.6));
+            padding: 35px;
+            border-radius: 20px;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            max-width: 700px;
+        }
+
+        .level-description h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-yellow);
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-transform: uppercase;
             letter-spacing: 0.1rem;
         }
+
+        .level-description p {
+            color: var(--star-white);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        /* NEW: Level Navigation Buttons */
+        .level-nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 700px;
+            margin-top: 40px;
+        }
+
+        .level-nav-btn {
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 15px 30px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+        }
+
+        .level-nav-btn#next-level-btn {
+            border-color: var(--neon-yellow);
+            color: var(--neon-yellow);
+            box-shadow: 0 0 15px rgba(255, 213, 0, 0.4);
+        }
+
+        .level-nav-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            background: var(--neon-cyan);
+            color: var(--cosmic-dark);
+            box-shadow: 0 5px 25px rgba(0, 240, 255, 0.7);
+        }
+
+        .level-nav-btn#next-level-btn:hover:not(:disabled) {
+            background: var(--neon-yellow);
+            color: var(--cosmic-dark);
+            box-shadow: 0 5px 25px rgba(255, 213, 0, 0.7);
+        }
+
+        .level-nav-btn:disabled {
+            opacity: 0.3;
+            filter: grayscale(80%);
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: none;
+            background: transparent !important;
+        }
+
+        .level-nav-btn#prev-level-btn:disabled {
+            color: var(--neon-cyan);
+        }
+
+        .level-nav-btn#next-level-btn:disabled {
+            color: var(--neon-yellow);
+        }
+
 
         /* Responsive */
         @media (max-width: 768px) {
             h1 {
                 font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
             }
 
             .level-node {
@@ -348,11 +524,20 @@
             }
 
             .level-title {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
 
             .level-content {
                 padding: 30px;
+            }
+
+            .level-nav-buttons {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .level-nav-btn {
+                text-align: center;
             }
         }
     </style>
@@ -360,66 +545,70 @@
 
 <body>
     <div id="map-view">
-        <h1>Onboard Journey</h1>
+        <h1>Onboarding Journey</h1>
+        <p class="subtitle">Welcome to your cosmic career adventure</p>
         <div class="road-container">
+            <!-- SVG Path will be drawn here by JavaScript -->
+            <svg class="path-line" id="path-svg"></svg>
+
             <div class="level-node" onclick="goToLevel(1)">
                 <div class="level-circle">
                     <div class="level-number">1</div>
-                    <div class="level-label">Start</div>
+                    <div class="level-label">Welcome</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(2)">
                 <div class="level-circle">
                     <div class="level-number">2</div>
-                    <div class="level-label">Nebula</div>
+                    <div class="level-label">Company</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(3)">
                 <div class="level-circle">
                     <div class="level-number">3</div>
-                    <div class="level-label">Asteroid</div>
+                    <div class="level-label">Culture</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(4)">
                 <div class="level-circle">
                     <div class="level-number">4</div>
-                    <div class="level-label">Comet</div>
+                    <div class="level-label">Your Team</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(5)">
                 <div class="level-circle">
                     <div class="level-number">5</div>
-                    <div class="level-label">Planet</div>
+                    <div class="level-label">Tools</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(6)">
                 <div class="level-circle">
                     <div class="level-number">6</div>
-                    <div class="level-label">Rings</div>
+                    <div class="level-label">Policies</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(7)">
                 <div class="level-circle">
                     <div class="level-number">7</div>
-                    <div class="level-label">Moon</div>
+                    <div class="level-label">Benefits</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(8)">
                 <div class="level-circle">
                     <div class="level-number">8</div>
-                    <div class="level-label">Star</div>
+                    <div class="level-label">Training</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(9)">
                 <div class="level-circle">
                     <div class="level-number">9</div>
-                    <div class="level-label">Galaxy</div>
+                    <div class="level-label">First Week</div>
                 </div>
             </div>
             <div class="level-node" onclick="goToLevel(10)">
                 <div class="level-circle">
                     <div class="level-number">10</div>
-                    <div class="level-label">Infinity</div>
+                    <div class="level-label">Ready!</div>
                 </div>
             </div>
         </div>
@@ -429,25 +618,263 @@
         <div class="sidebar">
             <h2>Navigation</h2>
             <button class="back-button" onclick="backToMap()">Return to Map</button>
+
+            <div class="progress-indicator">
+                <div class="progress-text">Progress</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 10%"></div>
+                </div>
+            </div>
         </div>
         <div class="level-content">
-            <div class="level-title" id="level-title">LEVEL 1</div>
-            <div class="level-message">You clicked on Level <span id="level-number-text">1</span></div>
+            <div class="level-icon" id="level-icon">🚀</div>
+            <div class="level-title" id="level-title">Welcome</div>
+            <div class="level-message" id="level-message">You're viewing onboarding step 1</div>
+            <div class="level-description">
+                <h3 id="level-desc-title">Getting Started</h3>
+                <p id="level-desc-text">This is where you'll learn everything you need to know to get started with our
+                    company. Click through each level to complete your onboarding journey!</p>
+            </div>
+
+            <!-- NEW: Level Navigation Buttons -->
+            <div class="level-nav-buttons">
+                <button class="level-nav-btn" id="prev-level-btn" onclick="goToPrevLevel()">← Previous</button>
+                <button class="level-nav-btn" id="next-level-btn" onclick="goToNextLevel()">Next →</button>
+            </div>
+
         </div>
     </div>
 
     <script>
+        let maxCompletedLevel = 1;
+        let currentLevel = 1; // Track the current open level
+
+        const levelData = {
+            1: {
+                icon: '👋',
+                title: 'Welcome Aboard',
+                message: 'Let\'s get you started with your onboarding journey',
+                descTitle: 'Welcome to Our Company',
+                descText: 'We\'re thrilled to have you join our team! This onboarding process will help you get up to speed quickly and feel at home. Take your time going through each step.'
+            },
+            2: {
+                icon: '🏢',
+                title: 'Company Overview',
+                message: 'Learn about our mission, vision, and history',
+                descTitle: 'Who We Are',
+                descText: 'Discover our company\'s story, values, and what makes us unique. Understanding our mission will help you see how your role contributes to our bigger picture.'
+            },
+            3: {
+                icon: '💫',
+                title: 'Our Culture',
+                message: 'Explore our values and work environment',
+                descTitle: 'Living Our Values',
+                descText: 'Our culture is built on collaboration, innovation, and respect. Learn about how we work together and the principles that guide our daily interactions.'
+            },
+            4: {
+                icon: '👥',
+                title: 'Meet Your Team',
+                message: 'Get to know the people you\'ll be working with',
+                descTitle: 'Your Colleagues',
+                descText: 'You\'ll be working with an amazing group of talented individuals. Here\'s where you\'ll learn about your team structure and key contacts.'
+            },
+            5: {
+                icon: '🛠️',
+                title: 'Tools & Systems',
+                message: 'Access the platforms and software we use daily',
+                descTitle: 'Your Digital Toolkit',
+                descText: 'Get set up with all the essential tools, software, and systems you\'ll need. From communication platforms to project management tools, we\'ve got you covered.'
+            },
+            6: {
+                icon: '📜',
+                title: 'Policies & Guidelines',
+                message: 'Important information about how we operate',
+                descTitle: 'Know the Rules',
+                descText: 'Familiarize yourself with our company policies, code of conduct, and important guidelines that keep our workplace safe and productive.'
+            },
+            7: {
+                icon: '🎁',
+                title: 'Benefits & Perks',
+                message: 'Discover what we offer to support you',
+                descTitle: 'Taking Care of You',
+                descText: 'Learn about your health benefits, time off policies, retirement plans, and all the perks that come with being part of our team.'
+            },
+            8: {
+                icon: '📚',
+                title: 'Training Resources',
+                message: 'Access learning materials and development programs',
+                descTitle: 'Continuous Learning',
+                descText: 'We invest in your growth. Explore the training programs, courses, and resources available to help you develop your skills and advance your career.'
+            },
+            9: {
+                icon: '🚀',
+                title: 'Your First Week',
+                message: 'What to expect in your initial days',
+                descTitle: 'Getting Started',
+                descText: 'Here\'s your roadmap for the first week. From meetings to introductions, we\'ll make sure you have a smooth start and feel welcomed from day one.'
+            },
+            10: {
+                icon: '🎯',
+                title: 'Mission Ready',
+                message: 'Congratulations on completing your onboarding!',
+                descTitle: 'Ready to Launch',
+                descText: 'You\'ve completed the onboarding process! You now have all the knowledge and tools to hit the ground running. Welcome to the team – let\'s do great things together!'
+            }
+        };
+
         function goToLevel(levelNum) {
+            currentLevel = levelNum; // Set the current level
+            const data = levelData[levelNum];
             document.getElementById('map-view').style.display = 'none';
             document.getElementById('level-view').classList.add('active');
-            document.getElementById('level-title').textContent = `LEVEL ${levelNum}`;
-            document.getElementById('level-number-text').textContent = levelNum;
+
+            document.getElementById('level-icon').textContent = data.icon;
+            document.getElementById('level-title').textContent = data.title;
+            document.getElementById('level-message').textContent = data.message;
+            document.getElementById('level-desc-title').textContent = data.descTitle;
+            document.getElementById('level-desc-text').textContent = data.descText;
+
+            // Update progress bar
+            const progress = (levelNum / 10) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+
+            // Update the max completed level
+            if (levelNum > maxCompletedLevel) {
+                maxCompletedLevel = levelNum;
+            }
+
+            // Redraw path (will happen mostly off-screen but keeps state)
+            drawPath();
+
+            // Handle button states
+            document.getElementById('prev-level-btn').disabled = (levelNum === 1);
+            document.getElementById('next-level-btn').disabled = (levelNum === 10);
         }
 
         function backToMap() {
             document.getElementById('level-view').classList.remove('active');
             document.getElementById('map-view').style.display = 'flex';
+            // Redraw the path AFTER the map is visible again
+            requestAnimationFrame(drawPath);
         }
+
+        // NEW: Functions for next/prev buttons
+        function goToNextLevel() {
+            if (currentLevel < 10) {
+                goToLevel(currentLevel + 1);
+            }
+        }
+
+        function goToPrevLevel() {
+            if (currentLevel > 1) {
+                goToLevel(currentLevel - 1);
+            }
+        }
+
+
+        /**
+         * Draws the winding SVG path between level nodes, splitting
+         * into "completed" (green) and "pending" (cyan) sections.
+         */
+        function drawPath() {
+            const svg = document.getElementById('path-svg');
+            if (!svg) return;
+            svg.innerHTML = ''; // Clear old paths on redraw
+
+            const nodes = document.querySelectorAll('.level-node');
+            if (nodes.length === 0) return;
+
+            const roadContainer = document.querySelector('.road-container');
+            if (!roadContainer) return;
+            // Get container's position relative to the viewport
+            const containerRect = roadContainer.getBoundingClientRect();
+
+            // Create two separate path elements
+            const completedPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            completedPath.setAttribute('class', 'completed');
+            const pendingPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            pendingPath.setAttribute('class', 'pending');
+
+            let completedPathData = "";
+            let pendingPathData = "";
+
+            // 1. Get all the node center points using getBoundingClientRect
+            //    This correctly gets the *rendered* position after CSS transforms.
+            const points = [];
+            nodes.forEach((node, index) => {
+                const nodeRect = node.getBoundingClientRect(); // Get node's rendered position
+                // Calculate center X relative to the container's left edge
+                const centerX = (nodeRect.left + nodeRect.width / 2) - containerRect.left;
+                // Calculate center Y relative to the container's top edge
+                const centerY = (nodeRect.top + nodeRect.height / 2) - containerRect.top;
+
+                // Don't add points that are at 0,0 (can happen if map is hidden)
+                if (centerX !== 0 && centerY !== 0) {
+                    points.push({ x: centerX, y: centerY });
+                }
+            });
+
+            // If no points were valid (e.g., map is hidden), stop.
+            if (points.length < 2) {
+                return;
+            }
+
+            <!-- 2. Build the path strings segment by segment -->
+            let lastCompletedPoint = null;
+
+            for (let i = 0; i < points.length - 1; i++) {
+                const p1 = points[i];
+                const p2 = points[i + 1];
+                const controlY = (p1.y + p2.y) / 2;
+                const curve = ` C ${p1.x} ${controlY}, ${p2.x} ${controlY}, ${p2.x} ${p2.y}`;
+
+                // Segment 'i' connects node i+1 to node i+2
+                // maxCompletedLevel is 1-indexed (level 1 is complete by default)
+                // i=0 connects level 1 to 2. This segment is 'complete' if maxCompletedLevel >= 1
+
+                // UPDATED LOGIC: Check if (i + 1) is less than max level.
+                // This means the path 1->2 (i=0) only turns green when maxCompletedLevel >= 2.
+                if (i + 1 < maxCompletedLevel) {
+                    // This segment is COMPLETED
+                    if (!completedPathData) {
+                        completedPathData = `M ${p1.x} ${p1.y}`; // Start the path
+                    }
+                    completedPathData += curve;
+                    lastCompletedPoint = p2; // Track the end of the green line
+                } else {
+                    // This segment is PENDING
+                    if (!pendingPathData) {
+                        // This is the first pending segment.
+                        // It must start where the last completed one left off, or at p1
+                        const startPoint = lastCompletedPoint || p1;
+                        pendingPathData = `M ${startPoint.x} ${startPoint.y}`;
+
+                        if (lastCompletedPoint && (startPoint.x !== p1.x || startPoint.y !== p1.y)) {
+                            // This case is tricky. The green line ended at point 'X'
+                            // The pending line starts at point 'Y'.
+                            // We should start the pending line at p1.
+                            pendingPathData = `M ${p1.x} ${p1.y}`;
+                        }
+                    }
+                    pendingPathData += curve;
+                }
+            }
+
+
+            // 3. Set the 'd' attribute and append to the SVG
+            if (completedPathData) {
+                completedPath.setAttribute('d', completedPathData);
+                svg.appendChild(completedPath);
+            }
+            if (pendingPathData) {
+                pendingPath.setAttribute('d', pendingPathData);
+                svg.appendChild(pendingPath);
+            }
+        }
+
+        // Draw the path on load and redraw on window resize
+        window.addEventListener('load', drawPath);
+        window.addEventListener('resize', drawPath);
     </script>
 </body>
 
