@@ -1,0 +1,25 @@
+{
+    "mcpServers": {
+        "developer-productivity": {
+            "command": "python",
+            "args": [
+                "mcp_server/server.py"
+            ],
+            "description": "Multi-purpose MCP server for developer productivity",
+            "features": [
+                "Git integration and version control",
+                "Code analysis and metrics",
+                "Documentation generation",
+                "Task decomposition",
+                "Time estimation",
+                "Test generation",
+                "Code review",
+                "Project statistics"
+            ],
+            "env": {
+                "PYTHONPATH": "."
+            }
+        }
+    },
+    "globalShortcut": "Cmd+Shift+M"
+}

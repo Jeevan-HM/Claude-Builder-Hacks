@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Actions Tester</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-8">
+        <h1 class="text-3xl font-bold mb-6">MCP Actions Tester</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Git Commit History -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Git Commit History</h2>
+                <button onclick="testAction('git_commit_history')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Git Status -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Git Status</h2>
+                <button onclick="testAction('git_status')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Git Contributors -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Git Contributors</h2>
+                <button onclick="testAction('git_contributors')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Analyze Code -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Analyze Code</h2>
+                <input type="text" id="analyze_code_path" placeholder="File Path (e.g., app.py)"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('analyze_code', {file_path: document.getElementById('analyze_code_path').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Search Code -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Search Code</h2>
+                <input type="text" id="search_code_query" placeholder="Query (e.g., 'Flask')"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button onclick="testAction('search_code', {query: document.getElementById('search_code_query').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Generate Documentation -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Generate Documentation</h2>
+                <input type="text" id="generate_documentation_path" placeholder="File Path (e.g., app.py)"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('generate_documentation', {file_path: document.getElementById('generate_documentation_path').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Decompose Task -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Decompose Task</h2>
+                <input type="text" id="decompose_task_desc" placeholder="Task Description"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('decompose_task', {task_description: document.getElementById('decompose_task_desc').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Estimate Task Time -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Estimate Task Time</h2>
+                <input type="text" id="estimate_task_title" placeholder="Task Title"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('estimate_task_time', {task_title: document.getElementById('estimate_task_title').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Generate Tests -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Generate Tests</h2>
+                <input type="text" id="generate_tests_path" placeholder="File Path (e.g., app.py)"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('generate_tests', {file_path: document.getElementById('generate_tests_path').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Review Code -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Review Code</h2>
+                <input type="text" id="review_code_path" placeholder="File Path (e.g., app.py)"
+                    class="bg-gray-700 text-white rounded p-2 w-full mb-2">
+                <button
+                    onclick="testAction('review_code', {file_path: document.getElementById('review_code_path').value})"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+
+            <!-- Project Statistics -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4">Project Statistics</h2>
+                <button onclick="testAction('project_statistics')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Run
+                </button>
+            </div>
+        </div>
+
+        <div id="results-container" class="mt-8 bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-4">Results</h2>
+            <pre id="results" class="text-sm whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        async function testAction(toolName, args = {}) {
+            const resultsEl = document.getElementById('results');
+            resultsEl.textContent = 'Loading...';
+
+            try {
+                const response = await fetch('/api/mcp/call_tool', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        toolName: toolName,
+                        props: args,
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // The actual content is in the 'text' property of the first item in the 'contents' array
+                if (result.contents && result.contents.length > 0 && result.contents[0].text) {
+                    try {
+                        // Try to parse and format if it's JSON
+                        const formatted = JSON.stringify(JSON.parse(result.contents[0].text), null, 2);
+                        resultsEl.textContent = formatted;
+                    } catch (e) {
+                        // Otherwise, just show the raw text
+                        resultsEl.textContent = result.contents[0].text;
+                    }
+                } else {
+                    resultsEl.textContent = JSON.stringify(result, null, 2);
+                }
+
+            } catch (error) {
+                resultsEl.textContent = `Error: ${error.message}`;
+                console.error('Error testing action:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
