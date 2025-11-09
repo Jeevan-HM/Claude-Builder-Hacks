@@ -70,6 +70,72 @@ const notifications = {
     }
 };
 
+// Tech Stack Polling System
+const techStackPolling = {
+    activePolls: new Map(), // taskId -> { intervalId, attempts }
+    maxAttempts: 20, // Poll for up to 20 attempts (about 1 minute)
+    pollInterval: 3000, // Check every 3 seconds
+
+    startPolling(taskId) {
+        // Don't start if already polling
+        if (this.activePolls.has(taskId)) {
+            return;
+        }
+
+        console.log('Starting tech stack polling for task:', taskId);
+        let attempts = 0;
+
+        const intervalId = setInterval(async () => {
+            attempts++;
+
+            try {
+                // Reload projects to get latest data
+                await loadProjects();
+
+                // Find the task
+                let task = null;
+                for (const projectId in state.projects) {
+                    const project = state.projects[projectId];
+                    task = project.tasks.find(t => t.id === taskId);
+                    if (task) break;
+                }
+
+                // Check if tech stack has been generated
+                if (task && task.techStack && task.techStack.techStack && task.techStack.techStack.length > 0) {
+                    console.log('Tech stack found for task:', taskId);
+                    notifications.success('Tech stack has been auto-generated! ✨');
+                    renderAll();
+                    this.stopPolling(taskId);
+                } else if (attempts >= this.maxAttempts) {
+                    console.log('Tech stack polling timeout for task:', taskId);
+                    this.stopPolling(taskId);
+                }
+            } catch (error) {
+                console.error('Error during tech stack polling:', error);
+                this.stopPolling(taskId);
+            }
+        }, this.pollInterval);
+
+        this.activePolls.set(taskId, { intervalId, attempts });
+    },
+
+    stopPolling(taskId) {
+        const poll = this.activePolls.get(taskId);
+        if (poll) {
+            clearInterval(poll.intervalId);
+            this.activePolls.delete(taskId);
+            console.log('Stopped polling for task:', taskId);
+        }
+    },
+
+    stopAll() {
+        for (const [taskId, poll] of this.activePolls.entries()) {
+            clearInterval(poll.intervalId);
+        }
+        this.activePolls.clear();
+    }
+};
+
 // Confirmation Modal System
 const confirmation = {
     show(options) {
@@ -573,7 +639,7 @@ async function renderTeamCards() {
                     </button>
                 </div>
             </div>
-            <div class="p-5 min-h-[180px] bg-slate-800/30">
+            <div class="p-5 bg-slate-800/30 overflow-y-auto" style="max-height: 500px; min-height: 180px;">
                 ${assignedTask ?
                 renderTaskOnCard(assignedTask) :
                 `<div class="flex items-center justify-center h-full">
@@ -612,16 +678,27 @@ async function renderTeamCards() {
 function renderTaskOnCard(task) {
     const priorityClass = getPriorityClasses(task.priority);
     const hasTechStack = task.techStack && task.techStack.techStack && task.techStack.techStack.length > 0;
-    
+
+    // Add badge indicator on task header
+    const techStackBadge = hasTechStack
+        ? '<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" title="Tech stack suggestions available">✨ AI</span>'
+        : '';
+
     let techStackHtml = '';
     if (hasTechStack) {
         const topTech = task.techStack.techStack.slice(0, 3);
         techStackHtml = `
-            <div class="mt-3 pt-3 border-t border-slate-600/30">
-                <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                    <i data-lucide="code" class="mr-1.5 h-3.5 w-3.5 text-emerald-500"></i>
-                    Suggested Tech Stack
-                </h4>
+            <div class="mt-3 pt-3 border-t border-slate-600/30 ml-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center">
+                        <i data-lucide="code" class="mr-1.5 h-3.5 w-3.5 text-emerald-500"></i>
+                        Suggested Tech Stack
+                    </h4>
+                    <button class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1" onclick="generateTechStack(event, '${task.id}')" title="Regenerate tech stack suggestions">
+                        <i data-lucide="refresh-cw" class="h-3 w-3"></i>
+                        Regenerate
+                    </button>
+                </div>
                 <div class="flex flex-wrap gap-1.5">
                     ${topTech.map(tech => `
                         <span class="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md" title="${tech.purpose}">
@@ -637,24 +714,30 @@ function renderTaskOnCard(task) {
         `;
     } else {
         techStackHtml = `
-            <div class="mt-3 pt-3 border-t border-slate-600/30">
-                <button class="w-full text-xs px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg transition-all flex items-center justify-center gap-2" onclick="generateTechStack(event, '${task.id}')">
-                    <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
-                    Suggest Tech Stack
-                </button>
+            <div class="mt-3 pt-3 border-t border-slate-600/30 ml-6">
+                <div class="flex items-center justify-center">
+                    <div class="spinner mr-2" style="border-color: rgba(16, 185, 129, 0.3); border-top-color: rgb(16, 185, 129); width: 1rem; height: 1rem;"></div>
+                    <p class="text-xs text-emerald-400 italic">Generating tech stack suggestions...</p>
+                </div>
             </div>
         `;
     }
-    
+
     return `
-        <div class="task-card-assigned relative group p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 hover:border-emerald-500/30 transition-all" draggable="true" data-task-id="${task.id}" data-project-id="${task.projectId}">
+        <div class="task-card-assigned relative group p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 hover:border-emerald-500/30 transition-all cursor-move" draggable="true" data-task-id="${task.id}" data-project-id="${task.projectId}" title="Drag to move task back to backlog or to another team member">
+            <div class="absolute top-2 left-2 opacity-0 group-hover:opacity-100 text-slate-500 transition-all pointer-events-none">
+                <i data-lucide="grip-vertical" class="h-4 w-4"></i>
+            </div>
             <button class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" onclick="deleteTaskConfirm(event, '${task.id}')">
                 <i data-lucide="trash-2" class="h-4 w-4"></i>
             </button>
-            <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Current Task</h4>
-            <p class="mt-2 text-sm text-slate-100 font-semibold editable-field" contenteditable="true" data-task-id="${task.id}" data-field="title">${task.title}</p>
+            <div class="flex items-center ml-6">
+                <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Current Task</h4>
+                ${techStackBadge}
+            </div>
+            <p class="mt-2 text-sm text-slate-100 font-semibold editable-field ml-6" contenteditable="true" data-task-id="${task.id}" data-field="title">${task.title}</p>
             
-            <div class="mt-4 flex justify-between items-start gap-4">
+            <div class="mt-4 flex justify-between items-start gap-4 ml-6">
                 <div class="flex-1">
                     <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Priority</h4>
                     <select class="text-xs font-semibold px-3 py-1.5 rounded-full border-0 ${priorityClass} cursor-pointer hover:opacity-80 transition-opacity" data-task-id="${task.id}" data-field="priority">
@@ -720,6 +803,12 @@ async function renderProjectBacklog() {
                     <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-slate-500"></i>
                     ${task.deadline}
                 </span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-slate-700/30">
+                <p class="text-xs text-slate-400 italic flex items-center justify-center">
+                    <i data-lucide="sparkles" class="mr-1.5 h-3 w-3 text-emerald-500"></i>
+                    Tech stack will be auto-generated when assigned
+                </p>
             </div>
         `;
         list.appendChild(taskCard);
@@ -817,16 +906,32 @@ function addDragAndDropListeners() {
 }
 
 function handleDragStart(e) {
-    e.target.classList.add('task-card-dragging');
+    // Prevent drag if clicking on interactive elements
+    if (e.target.tagName === 'BUTTON' ||
+        e.target.tagName === 'SELECT' ||
+        e.target.tagName === 'INPUT' ||
+        e.target.classList.contains('editable-field') ||
+        e.target.closest('button') ||
+        e.target.closest('select')) {
+        e.preventDefault();
+        return;
+    }
+
+    // Get the task card element (could be e.target or a parent)
+    const taskCard = e.target.closest('[data-task-id]') || e.target;
+
+    taskCard.classList.add('task-card-dragging');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', JSON.stringify({
-        taskId: e.target.dataset.taskId,
-        projectId: e.target.dataset.projectId
+        taskId: taskCard.dataset.taskId,
+        projectId: taskCard.dataset.projectId
     }));
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('task-card-dragging');
+    // Get the task card element
+    const taskCard = e.target.closest('[data-task-id]') || e.target;
+    taskCard.classList.remove('task-card-dragging');
 }
 
 function handleDragOver(e) {
@@ -870,7 +975,38 @@ async function handleDropOnTeamCard(e) {
 
         await assignTask(task.id, teamId);
         task.assignedTo = teamId;
+
         await renderAll();
+
+        // Automatically generate tech stack if task doesn't have one
+        if (!task.techStack || !task.techStack.techStack || task.techStack.techStack.length === 0) {
+            notifications.info('🤖 AI is generating tech stack suggestions...', 3000);
+
+            // Trigger tech stack generation immediately
+            try {
+                const response = await fetch(`${API_BASE}/tasks/${task.id}/suggest-tech-stack`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    notifications.success(`✨ Tech stack suggested by ${result.generatedBy}`, 4000);
+
+                    // Reload and re-render to show the updated tech stack
+                    await loadProjects();
+                    await renderAll();
+                } else {
+                    throw new Error('Failed to generate tech stack');
+                }
+            } catch (error) {
+                console.error('Failed to auto-generate tech stack:', error);
+                notifications.warning('Tech stack generation failed. Click regenerate to try again.', 5000);
+            }
+        }
+
+        // Sync with mindmap
+        await syncMindmap();
     }
 }
 
@@ -905,6 +1041,9 @@ async function handleDropOnBacklog(e) {
         await assignTask(task.id, null);
         task.assignedTo = null;
         await renderAll();
+
+        // Sync with mindmap
+        await syncMindmap();
     }
 }
 
@@ -987,6 +1126,9 @@ async function handleMemberDropOnProject(e) {
             } else {
                 await renderSidebar();
             }
+
+            // Sync with mindmap
+            await syncMindmap();
         }
     } catch (error) {
         console.error('Drop failed:', error);
@@ -1056,6 +1198,9 @@ async function deleteTaskConfirm(event, taskId) {
             project.tasks = project.tasks.filter(t => t.id !== taskId);
             notifications.success('Task deleted successfully');
             await renderAll();
+
+            // Sync with mindmap
+            await syncMindmap();
         }
     });
 }
@@ -1085,8 +1230,65 @@ async function deleteProjectConfirm(event, projectId) {
 
             notifications.success(`Project "${project?.name}" deleted successfully`);
             await renderAll();
+
+            // Sync with mindmap
+            await syncMindmap();
         }
     });
+}
+
+// Auto-generate tech stack for assigned tasks without one
+async function autoGenerateMissingTechStacks() {
+    const tasksNeedingTechStack = [];
+
+    // Find all assigned tasks without tech stack
+    for (const projectId in state.projects) {
+        const project = state.projects[projectId];
+        if (project.tasks) {
+            project.tasks.forEach(task => {
+                if (task.assignedTo && (!task.techStack || !task.techStack.techStack || task.techStack.techStack.length === 0)) {
+                    tasksNeedingTechStack.push({ task, projectId });
+                }
+            });
+        }
+    }
+
+    if (tasksNeedingTechStack.length === 0) {
+        return;
+    }
+
+    console.log(`Auto-generating tech stack for ${tasksNeedingTechStack.length} assigned tasks...`);
+
+    // Generate tech stack for each task (with a small delay between requests)
+    for (let i = 0; i < tasksNeedingTechStack.length; i++) {
+        const { task, projectId } = tasksNeedingTechStack[i];
+
+        try {
+            const response = await fetch(`${API_BASE}/tasks/${task.id}/suggest-tech-stack`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(`✓ Tech stack generated for task ${task.id} by ${result.generatedBy}`);
+            }
+
+            // Small delay to avoid overwhelming the API
+            if (i < tasksNeedingTechStack.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        } catch (error) {
+            console.error(`Failed to generate tech stack for task ${task.id}:`, error);
+        }
+    }
+
+    // Reload projects to show the new tech stacks
+    if (tasksNeedingTechStack.length > 0) {
+        await loadProjects();
+        await renderAll();
+        notifications.success(`✨ Tech stacks generated for ${tasksNeedingTechStack.length} task${tasksNeedingTechStack.length > 1 ? 's' : ''}`, 4000);
+    }
 }
 
 // Initialize Application
@@ -1104,7 +1306,16 @@ async function initializeApp() {
         });
 
         const projects = await loadProjects();
+        console.log('Loaded projects:', projects);
         projects.forEach(project => {
+            // Log tech stack info for debugging
+            if (project.tasks) {
+                project.tasks.forEach(task => {
+                    if (task.techStack) {
+                        console.log(`Task ${task.id} has tech stack:`, task.techStack);
+                    }
+                });
+            }
             state.projects[project.id] = project;
         });
 
@@ -1113,6 +1324,10 @@ async function initializeApp() {
         }
 
         await renderAll();
+
+        // Auto-generate tech stack for assigned tasks that don't have one
+        await autoGenerateMissingTechStacks();
+
         notifications.success('Dashboard loaded successfully', 2000);
     } catch (error) {
         console.error('Failed to initialize app:', error);
@@ -1252,6 +1467,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 notifications.success(`Task "${title}" created successfully`);
                 await renderAll();
+
+                // Sync with mindmap
+                await syncMindmap();
             } catch (error) {
                 console.error('Failed to create task:', error);
                 notifications.error('Failed to create task. Please try again.');
@@ -1621,6 +1839,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 notifications.success(`Project "${name}" created successfully`);
                 await renderAll();
+
+                // Sync with mindmap
+                await syncMindmap();
             } catch (error) {
                 console.error('Failed to create project:', error);
                 notifications.error('Failed to create project. Please try again.');
@@ -1688,6 +1909,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initializeApp();
+});
+
+// Cleanup polling on page unload
+window.addEventListener('beforeunload', () => {
+    techStackPolling.stopAll();
 });
 
 // Team Management Modal Functions
@@ -1857,29 +2083,31 @@ function openProjectModal() {
 async function generateTechStack(event, taskId) {
     event.stopPropagation();
     event.preventDefault();
-    
+
     const button = event.currentTarget;
     const originalHtml = button.innerHTML;
     button.disabled = true;
     button.innerHTML = '<i data-lucide="loader" class="h-3.5 w-3.5 animate-spin"></i> Generating...';
     lucide.createIcons();
-    
+
     try {
+        console.log('Generating tech stack for task:', taskId);
         const response = await fetch(`${API_BASE}/tasks/${taskId}/suggest-tech-stack`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' }
         });
-        
+
         if (!response.ok) throw new Error('Failed to generate tech stack');
-        
+
         const result = await response.json();
-        
+        console.log('Tech stack generated:', result);
+
         notifications.success(`Tech stack suggested by ${result.generatedBy}`);
-        
+
         // Reload data to show the updated tech stack
         await loadProjects();
         renderAll();
-        
+
     } catch (error) {
         console.error('Failed to generate tech stack:', error);
         notifications.error('Failed to generate tech stack. Please try again.');
@@ -1892,7 +2120,7 @@ async function generateTechStack(event, taskId) {
 function showTechStackModal(event, taskId) {
     event.stopPropagation();
     event.preventDefault();
-    
+
     // Find the task
     let task = null;
     for (const projectId in state.projects) {
@@ -1900,14 +2128,14 @@ function showTechStackModal(event, taskId) {
         task = project.tasks.find(t => t.id === taskId);
         if (task) break;
     }
-    
+
     if (!task || !task.techStack) {
         notifications.error('Tech stack not found');
         return;
     }
-    
+
     const techStack = task.techStack;
-    
+
     let modalHtml = `
         <div id="tech-stack-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick="this.remove()">
             <div class="bg-slate-800 rounded-xl border border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
@@ -2014,7 +2242,7 @@ function showTechStackModal(event, taskId) {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     lucide.createIcons();
 }

@@ -78,7 +78,7 @@
             background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(16, 185, 129, 0.15);
-            z-index: 1000;
+            z-index: 99999;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -321,7 +321,7 @@
             color: var(--emerald-400);
             font-weight: 600;
             font-size: 0.9rem;
-            z-index: 1000;
+            z-index: 99998;
             display: none;
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
@@ -402,7 +402,7 @@
             color: var(--emerald-400);
             font-size: 0.85rem;
             font-weight: 600;
-            z-index: 1000;
+            z-index: 99998;
             backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
@@ -445,6 +445,21 @@
 
         .canvas::-webkit-scrollbar-thumb:hover {
             background: rgba(16, 185, 129, 0.5);
+        }
+
+        /* Selection rectangle */
+        .selection-rect {
+            position: absolute;
+            border: 2px dashed var(--emerald-400);
+            background: rgba(16, 185, 129, 0.1);
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .node.selected {
+            box-shadow: 0 0 0 3px var(--emerald-400), 0 8px 25px rgba(16, 185, 129, 0.3);
+            transform: scale(1.02);
         }
 
         @media (max-width: 768px) {
@@ -497,6 +512,9 @@
             </div>
         </div>
         <div class="controls">
+            <button id="sync-btn" class="btn" title="Sync with Dashboard Data">
+                Sync from Dashboard
+            </button>
             <div class="line-style-selector">
                 <button class="line-style-btn active" data-style="curved">Curved</button>
                 <button class="line-style-btn" data-style="straight">Straight</button>
@@ -520,6 +538,7 @@
     <div class="canvas" id="canvas">
         <div class="canvas-inner" id="canvas-inner">
             <svg id="connector-svg"></svg>
+            <div class="selection-rect" id="selection-rect"></div>
         </div>
     </div>
 
@@ -612,6 +631,13 @@
         let connectMode = false;
         let firstConnectNode = null;
 
+        // Multi-select variables
+        let isSelecting = false;
+        let selectionStart = { x: 0, y: 0 };
+        let selectedNodes = new Set();
+        let isDraggingSelection = false;
+        let selectionDragStart = { x: 0, y: 0 };
+
         const lineColors = {
             0: 'rgba(52, 211, 153, 0.7)',
             1: 'rgba(16, 185, 129, 0.7)',
@@ -668,14 +694,38 @@
                     return;
                 }
 
-                draggedNode = node;
-                const rect = div.getBoundingClientRect();
+                // Check if this node is part of selected group
+                if (selectedNodes.has(node.id)) {
+                    // Start dragging all selected nodes
+                    isDraggingSelection = true;
+                    const rect = div.getBoundingClientRect();
+                    selectionDragStart = {
+                        x: e.clientX,
+                        y: e.clientY
+                    };
+                } else {
+                    // Clear selection if not holding Shift/Ctrl
+                    if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                        clearSelection();
+                    }
 
-                dragOffset.x = e.clientX - rect.left;
-                dragOffset.y = e.clientY - rect.top;
+                    // Start dragging single node
+                    draggedNode = node;
+                    const rect = div.getBoundingClientRect();
+                    dragOffset.x = e.clientX - rect.left;
+                    dragOffset.y = e.clientY - rect.top;
+                    div.classList.add('dragging');
+                }
 
-                div.classList.add('dragging');
                 e.preventDefault();
+            });
+
+            // Add click handler for multi-select
+            div.addEventListener('click', (e) => {
+                if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                    e.stopPropagation();
+                    toggleNodeSelection(node.id);
+                }
             });
 
             // Connect button
@@ -834,7 +884,34 @@
 
         let rafId = null;
         document.addEventListener('mousemove', (e) => {
-            if (draggedNode) {
+            if (isDraggingSelection) {
+                // Drag all selected nodes together
+                if (rafId) return;
+
+                rafId = requestAnimationFrame(() => {
+                    const canvasRect = canvasInner.getBoundingClientRect();
+                    const deltaX = e.clientX - selectionDragStart.x;
+                    const deltaY = e.clientY - selectionDragStart.y;
+
+                    selectedNodes.forEach(nodeId => {
+                        const node = nodes.find(n => n.id === nodeId);
+                        if (node) {
+                            node.x += deltaX;
+                            node.y += deltaY;
+
+                            const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                            if (elem) {
+                                elem.style.left = `${node.x}px`;
+                                elem.style.top = `${node.y}px`;
+                            }
+                        }
+                    });
+
+                    selectionDragStart = { x: e.clientX, y: e.clientY };
+                    drawConnections();
+                    rafId = null;
+                });
+            } else if (draggedNode) {
                 if (rafId) return;
 
                 rafId = requestAnimationFrame(() => {
@@ -852,17 +929,139 @@
                     drawConnections();
                     rafId = null;
                 });
+            } else if (isSelecting) {
+                // Update selection rectangle
+                if (rafId) return;
+
+                rafId = requestAnimationFrame(() => {
+                    const canvasRect = canvasInner.getBoundingClientRect();
+                    const currentX = e.clientX - canvasRect.left;
+                    const currentY = e.clientY - canvasRect.top;
+
+                    updateSelectionRect(selectionStart.x, selectionStart.y, currentX, currentY);
+                    highlightNodesInSelection();
+                    rafId = null;
+                });
             }
         });
 
         document.addEventListener('mouseup', async () => {
-            if (draggedNode) {
+            if (isDraggingSelection) {
+                // Save all selected nodes
+                for (const nodeId of selectedNodes) {
+                    const node = nodes.find(n => n.id === nodeId);
+                    if (node) {
+                        await saveNodeToDB(node);
+                    }
+                }
+                updateStatus('Selection moved!');
+                setTimeout(() => updateStatus('Connected to Database'), 2000);
+                isDraggingSelection = false;
+            } else if (draggedNode) {
                 const elem = document.querySelector(`[data-id="${draggedNode.id}"]`);
                 elem.classList.remove('dragging');
                 await saveNodeToDB(draggedNode);
                 updateStatus('Position saved!');
                 setTimeout(() => updateStatus('Connected to Database'), 2000);
                 draggedNode = null;
+            } else if (isSelecting) {
+                // Finalize selection
+                const selectionRect = document.getElementById('selection-rect');
+                selectionRect.style.display = 'none';
+                isSelecting = false;
+            }
+        });
+
+        // Multi-select helper functions
+        function toggleNodeSelection(nodeId) {
+            if (selectedNodes.has(nodeId)) {
+                selectedNodes.delete(nodeId);
+                const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                if (elem) elem.classList.remove('selected');
+            } else {
+                selectedNodes.add(nodeId);
+                const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                if (elem) elem.classList.add('selected');
+            }
+        }
+
+        function clearSelection() {
+            selectedNodes.forEach(nodeId => {
+                const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                if (elem) elem.classList.remove('selected');
+            });
+            selectedNodes.clear();
+        }
+
+        function updateSelectionRect(x1, y1, x2, y2) {
+            const selectionRect = document.getElementById('selection-rect');
+            const left = Math.min(x1, x2);
+            const top = Math.min(y1, y2);
+            const width = Math.abs(x2 - x1);
+            const height = Math.abs(y2 - y1);
+
+            selectionRect.style.left = `${left}px`;
+            selectionRect.style.top = `${top}px`;
+            selectionRect.style.width = `${width}px`;
+            selectionRect.style.height = `${height}px`;
+            selectionRect.style.display = 'block';
+        }
+
+        function highlightNodesInSelection() {
+            const selectionRect = document.getElementById('selection-rect');
+            const rect = selectionRect.getBoundingClientRect();
+            const canvasRect = canvasInner.getBoundingClientRect();
+
+            nodes.forEach(node => {
+                const elem = document.querySelector(`[data-id="${node.id}"]`);
+                if (elem) {
+                    const nodeRect = elem.getBoundingClientRect();
+
+                    // Check if node intersects with selection rectangle
+                    const intersects = !(
+                        nodeRect.right < rect.left ||
+                        nodeRect.left > rect.right ||
+                        nodeRect.bottom < rect.top ||
+                        nodeRect.top > rect.bottom
+                    );
+
+                    if (intersects) {
+                        if (!selectedNodes.has(node.id)) {
+                            selectedNodes.add(node.id);
+                            elem.classList.add('selected');
+                        }
+                    }
+                }
+            });
+        }
+
+        // Start selection rectangle on canvas background click
+        canvasInner.addEventListener('mousedown', (e) => {
+            // Only start selection if clicking on canvas background (not on a node)
+            if (e.target === canvasInner || e.target === svg || e.target === canvas) {
+                const canvasRect = canvasInner.getBoundingClientRect();
+                selectionStart = {
+                    x: e.clientX - canvasRect.left,
+                    y: e.clientY - canvasRect.top
+                };
+
+                // Clear previous selection if not holding Shift/Ctrl
+                if (!e.shiftKey && !e.ctrlKey && !e.metaKey) {
+                    clearSelection();
+                }
+
+                isSelecting = true;
+                e.preventDefault();
+            }
+        });
+
+        // Clear selection on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                clearSelection();
+                const selectionRect = document.getElementById('selection-rect');
+                selectionRect.style.display = 'none';
+                isSelecting = false;
             }
         });
 
@@ -999,12 +1198,21 @@
             try {
                 updateStatus('Loading...');
 
-                await initializeDatabase();
-
+                // Only initialize database if it's empty (first time)
+                // Check if nodes exist first
                 const loadedNodes = await loadNodesFromDB();
-                const loadedConnections = await loadConnectionsFromDB();
 
-                nodes = loadedNodes;
+                // If no nodes exist, initialize the database
+                if (loadedNodes.length === 0) {
+                    await initializeDatabase();
+                    // Reload nodes after initialization
+                    nodes = await loadNodesFromDB();
+                } else {
+                    // Use existing nodes
+                    nodes = loadedNodes;
+                }
+
+                const loadedConnections = await loadConnectionsFromDB();
                 connections = loadedConnections;
 
                 renderNodes();
@@ -1060,6 +1268,28 @@
                 document.getElementById('mode-indicator').classList.remove('active');
                 document.querySelector('.connecting')?.classList.remove('connecting');
                 firstConnectNode = null;
+            }
+        });
+
+        document.getElementById('sync-btn').addEventListener('click', async () => {
+            try {
+                updateStatus('Syncing from Dashboard...');
+                await syncFromTeamData();
+
+                // Reload the mindmap data
+                nodes = await loadNodesFromDB();
+                connections = await loadConnectionsFromDB();
+
+                renderNodes();
+                setTimeout(() => {
+                    drawConnections();
+                    updateStatus('Synced successfully!');
+                    setTimeout(() => updateStatus('Connected to Database'), 2000);
+                }, 50);
+            } catch (error) {
+                console.error('Sync failed:', error);
+                updateStatus('Sync failed', true);
+                setTimeout(() => updateStatus('Connected to Database'), 2000);
             }
         });
 
