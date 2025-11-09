@@ -101,9 +101,70 @@
         .subtitle {
             font-size: 1.3rem;
             color: var(--neon-cyan);
-            margin-bottom: 60px;
+            margin-bottom: 30px;
             text-align: center;
             letter-spacing: 0.1rem;
+        }
+
+        /* Navigation Links */
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 229, 0.1));
+            border: 2px solid var(--neon-cyan);
+            border-radius: 30px;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.05rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.3);
+            transition: width 0.5s, height 0.5s, top 0.5s, left 0.5s;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        .nav-link:hover {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .nav-link:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-link:nth-child(2) {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+        }
+
+        .nav-link:nth-child(2):hover {
+            border-color: var(--neon-yellow);
+            color: var(--neon-yellow);
+            box-shadow: 0 0 20px rgba(255, 0, 229, 0.5);
         }
 
         @keyframes glow-pulse {
@@ -547,6 +608,13 @@
     <div id="map-view">
         <h1>Onboarding Journey</h1>
         <p class="subtitle">Welcome to your cosmic career adventure</p>
+
+        <!-- Navigation Links -->
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-link">📊 Project Tracker</a>
+            <a href="/team_dashboard" class="nav-link">👥 Team Dashboard</a>
+        </div>
+
         <div class="road-container">
             <!-- SVG Path will be drawn here by JavaScript -->
             <svg class="path-line" id="path-svg"></svg>

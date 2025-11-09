@@ -16,6 +16,12 @@
             --neon-magenta: #ff00e5;
             --neon-yellow: #ffd500;
             --neon-green: #00ff88;
+            --neon-orange: #ff6b35;
+            --neon-purple: #9d4edd;
+            --neon-pink: #ff006e;
+            --neon-blue: #4361ee;
+            --neon-lime: #b5ff37;
+            --neon-red: #ff1744;
             --star-white: #ffffff;
         }
 
@@ -194,6 +200,7 @@
             position: absolute;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 12px;
             padding: 14px 24px;
             background: rgba(26, 29, 58, 0.8);
@@ -217,6 +224,7 @@
         .node:hover {
             transform: translateY(-2px);
             z-index: 100;
+            justify-content: flex-start;
         }
 
         .node.dragging {
@@ -249,6 +257,11 @@
             padding: 2px;
             border-radius: 4px;
             transition: background 0.2s ease;
+            text-align: center;
+        }
+
+        .node:hover .node-text {
+            text-align: left;
         }
 
         .node-text:focus {
@@ -259,6 +272,12 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .node:hover .node-controls {
+            opacity: 1;
         }
 
         .icon-btn {
@@ -276,6 +295,77 @@
             justify-content: center;
             line-height: 1;
             flex-shrink: 0;
+        }
+
+        .level-selector {
+            position: relative;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid;
+            background: rgba(10, 14, 39, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .level-selector:hover {
+            transform: scale(1.15);
+        }
+
+        .node.level-0 .level-selector {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        .node.level-1 .level-selector {
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+        }
+
+        .node.level-2 .level-selector {
+            border-color: var(--neon-yellow);
+            color: var(--neon-yellow);
+        }
+
+        .node.level-3 .level-selector {
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        .node.level-4 .level-selector {
+            border-color: var(--neon-orange);
+            color: var(--neon-orange);
+        }
+
+        .node.level-5 .level-selector {
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+        }
+
+        .node.level-6 .level-selector {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        .node.level-7 .level-selector {
+            border-color: var(--neon-blue);
+            color: var(--neon-blue);
+        }
+
+        .node.level-8 .level-selector {
+            border-color: var(--neon-lime);
+            color: var(--neon-lime);
+        }
+
+        .node.level-9 .level-selector {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
         }
 
         .icon-btn:hover {
@@ -350,6 +440,60 @@
 
         .node.level-3:hover {
             box-shadow: 0 6px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .node.level-4 {
+            border-color: var(--neon-orange);
+            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.25);
+        }
+
+        .node.level-4:hover {
+            box-shadow: 0 6px 30px rgba(255, 107, 53, 0.4);
+        }
+
+        .node.level-5 {
+            border-color: var(--neon-purple);
+            box-shadow: 0 4px 20px rgba(157, 78, 221, 0.25);
+        }
+
+        .node.level-5:hover {
+            box-shadow: 0 6px 30px rgba(157, 78, 221, 0.4);
+        }
+
+        .node.level-6 {
+            border-color: var(--neon-pink);
+            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.25);
+        }
+
+        .node.level-6:hover {
+            box-shadow: 0 6px 30px rgba(255, 0, 110, 0.4);
+        }
+
+        .node.level-7 {
+            border-color: var(--neon-blue);
+            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.25);
+        }
+
+        .node.level-7:hover {
+            box-shadow: 0 6px 30px rgba(67, 97, 238, 0.4);
+        }
+
+        .node.level-8 {
+            border-color: var(--neon-lime);
+            box-shadow: 0 4px 20px rgba(181, 255, 55, 0.25);
+        }
+
+        .node.level-8:hover {
+            box-shadow: 0 6px 30px rgba(181, 255, 55, 0.4);
+        }
+
+        .node.level-9 {
+            border-color: var(--neon-red);
+            box-shadow: 0 4px 20px rgba(255, 23, 68, 0.25);
+        }
+
+        .node.level-9:hover {
+            box-shadow: 0 6px 30px rgba(255, 23, 68, 0.4);
         }
 
         .connection-line {
@@ -454,6 +598,20 @@
             background: rgba(0, 240, 255, 0.5);
         }
 
+        .selection-box {
+            position: absolute;
+            border: 2px dashed var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.1);
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .node.selected {
+            outline: 3px solid var(--neon-cyan);
+            outline-offset: 2px;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.3rem;
@@ -494,12 +652,13 @@
 
     <div class="status-indicator">
         <div class="status-dot"></div>
-        <span>Auto-saving to database</span>
+        <span id="status-text">Connected to Flask</span>
     </div>
 
     <div class="canvas" id="canvas">
         <div class="canvas-inner" id="canvas-inner">
             <svg id="connector-svg"></svg>
+            <div class="selection-box" id="selection-box"></div>
         </div>
     </div>
 
@@ -508,127 +667,80 @@
     </div>
 
     <script>
-        // ==================== DATABASE SETUP ====================
-        let db;
-        const DB_NAME = 'ProjectTrackerDB';
-        const DB_VERSION = 1;
+        // ==================== API FUNCTIONS ====================
+        const API_BASE = '/api';
 
-        function initDatabase() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    resolve(db);
-                };
-
-                request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-
-                    // Create nodes store
-                    if (!db.objectStoreNames.contains('nodes')) {
-                        const nodeStore = db.createObjectStore('nodes', { keyPath: 'id' });
-                        nodeStore.createIndex('level', 'level', { unique: false });
-                    }
-
-                    // Create connections store
-                    if (!db.objectStoreNames.contains('connections')) {
-                        db.createObjectStore('connections', { keyPath: 'id', autoIncrement: true });
-                    }
-
-                    // Create settings store
-                    if (!db.objectStoreNames.contains('settings')) {
-                        db.createObjectStore('settings', { keyPath: 'key' });
-                    }
-                };
-            });
-        }
-
-        // Save node to database
-        async function saveNode(node) {
-            const transaction = db.transaction(['nodes'], 'readwrite');
-            const store = transaction.objectStore('nodes');
-            await store.put(node);
-        }
-
-        // Delete node from database
-        async function deleteNode(nodeId) {
-            const transaction = db.transaction(['nodes'], 'readwrite');
-            const store = transaction.objectStore('nodes');
-            await store.delete(nodeId);
-        }
-
-        // Load all nodes from database
-        async function loadNodes() {
-            const transaction = db.transaction(['nodes'], 'readonly');
-            const store = transaction.objectStore('nodes');
-            return new Promise((resolve, reject) => {
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
-            });
-        }
-
-        // Save connection to database
-        async function saveConnection(connection) {
-            const transaction = db.transaction(['connections'], 'readwrite');
-            const store = transaction.objectStore('connections');
-            await store.put(connection);
-        }
-
-        // Delete connection from database
-        async function deleteConnection(from, to) {
-            const transaction = db.transaction(['connections'], 'readonly');
-            const store = transaction.objectStore('connections');
-            const request = store.getAll();
-
-            request.onsuccess = async () => {
-                const connections = request.result;
-                const conn = connections.find(c => c.from === from && c.to === to);
-                if (conn) {
-                    const deleteTransaction = db.transaction(['connections'], 'readwrite');
-                    const deleteStore = deleteTransaction.objectStore('connections');
-                    await deleteStore.delete(conn.id);
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
                 }
-            };
+
+                return await response.json();
+            } catch (error) {
+                console.error('API call failed:', error);
+                updateStatus('Error: Check console', true);
+                throw error;
+            }
         }
 
-        // Load all connections from database
-        async function loadConnections() {
-            const transaction = db.transaction(['connections'], 'readonly');
-            const store = transaction.objectStore('connections');
-            return new Promise((resolve, reject) => {
-                const request = store.getAll();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => reject(request.error);
+        async function loadNodesFromDB() {
+            return await apiCall('/nodes');
+        }
+
+        async function saveNodeToDB(node) {
+            return await apiCall('/nodes', {
+                method: 'POST',
+                body: JSON.stringify(node)
             });
         }
 
-        // Save settings
-        async function saveSetting(key, value) {
-            const transaction = db.transaction(['settings'], 'readwrite');
-            const store = transaction.objectStore('settings');
-            await store.put({ key, value });
+        async function deleteNodeFromDB(nodeId) {
+            return await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
         }
 
-        // Load setting
-        async function loadSetting(key) {
-            const transaction = db.transaction(['settings'], 'readonly');
-            const store = transaction.objectStore('settings');
-            return new Promise((resolve, reject) => {
-                const request = store.get(key);
-                request.onsuccess = () => resolve(request.result ? request.result.value : null);
-                request.onerror = () => reject(request.error);
+        async function loadConnectionsFromDB() {
+            return await apiCall('/connections');
+        }
+
+        async function saveConnectionToDB(connection) {
+            return await apiCall('/connections', {
+                method: 'POST',
+                body: JSON.stringify(connection)
             });
         }
 
-        // Clear entire database
-        async function clearDatabase() {
-            const transaction = db.transaction(['nodes', 'connections', 'settings'], 'readwrite');
-            await transaction.objectStore('nodes').clear();
-            await transaction.objectStore('connections').clear();
-            await transaction.objectStore('settings').clear();
+        async function deleteConnectionFromDB(from, to) {
+            return await apiCall('/connections/by-nodes', {
+                method: 'DELETE',
+                body: JSON.stringify({ from, to })
+            });
+        }
+
+        async function clearAllData() {
+            return await apiCall('/clear-all', { method: 'DELETE' });
+        }
+
+        async function initializeDatabase() {
+            return await apiCall('/init-db', { method: 'POST' });
+        }
+
+        function updateStatus(text, isError = false) {
+            const statusText = document.getElementById('status-text');
+            statusText.textContent = text;
+            if (isError) {
+                statusText.style.color = 'var(--neon-magenta)';
+            } else {
+                statusText.style.color = 'var(--neon-green)';
+            }
         }
 
         // ==================== APP LOGIC ====================
@@ -636,21 +748,35 @@
         const canvasInner = document.getElementById('canvas-inner');
         const svg = document.getElementById('connector-svg');
         const modeIndicator = document.getElementById('mode-indicator');
+        const selectionBox = document.getElementById('selection-box');
 
         let nodes = [];
         let connections = [];
-        let nodeIdCounter = 0;
         let draggedNode = null;
         let dragOffset = { x: 0, y: 0 };
         let connectMode = false;
         let firstConnectNode = null;
         let lineStyle = 'curved';
 
+        // Selection variables
+        let isSelecting = false;
+        let selectionStart = { x: 0, y: 0 };
+        let selectedNodes = new Set();
+        let isDraggingSelection = false;
+        let selectionDragStart = { x: 0, y: 0 };
+        let selectedNodesStartPos = new Map();
+
         const lineColors = {
-            0: 'rgba(0, 240, 255, 0.7)',
-            1: 'rgba(255, 0, 229, 0.7)',
-            2: 'rgba(255, 213, 0, 0.7)',
-            3: 'rgba(0, 255, 136, 0.7)'
+            0: 'rgba(0, 240, 255, 0.7)',      // cyan
+            1: 'rgba(255, 0, 229, 0.7)',      // magenta
+            2: 'rgba(255, 213, 0, 0.7)',      // yellow
+            3: 'rgba(0, 255, 136, 0.7)',      // green
+            4: 'rgba(255, 107, 53, 0.7)',     // orange
+            5: 'rgba(157, 78, 221, 0.7)',     // purple
+            6: 'rgba(255, 0, 110, 0.7)',      // pink
+            7: 'rgba(67, 97, 238, 0.7)',      // blue
+            8: 'rgba(181, 255, 55, 0.7)',     // lime
+            9: 'rgba(255, 23, 68, 0.7)'       // red
         };
 
         const createNodeElement = (node) => {
@@ -663,6 +789,7 @@
             div.innerHTML = `
                 <span class="node-text" contenteditable="true">${node.text}</span>
                 <div class="node-controls">
+                    <div class="level-selector" title="Change level">L${node.level}</div>
                     <button class="icon-btn add-btn" title="Add child">+</button>
                     <button class="icon-btn connect-btn" title="Connect">⚡</button>
                     <button class="icon-btn delete-btn" title="Delete">×</button>
@@ -684,7 +811,9 @@
 
             textSpan.addEventListener('blur', async () => {
                 node.text = textSpan.textContent;
-                await saveNode(node);
+                await saveNodeToDB(node);
+                updateStatus('Saved!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
                 requestAnimationFrame(() => drawConnections());
             });
 
@@ -693,7 +822,28 @@
             });
 
             div.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.icon-btn') || e.target === textSpan) {
+                if (e.target.closest('.icon-btn') || e.target.closest('.level-selector') || e.target === textSpan) {
+                    return;
+                }
+
+                // If this node is in selection, drag all selected nodes
+                if (selectedNodes.has(node.id)) {
+                    isDraggingSelection = true;
+                    const canvasRect = canvasInner.getBoundingClientRect();
+                    selectionDragStart.x = e.clientX - canvasRect.left + canvas.scrollLeft;
+                    selectionDragStart.y = e.clientY - canvasRect.top + canvas.scrollTop;
+
+                    // Store starting positions
+                    selectedNodesStartPos.clear();
+                    selectedNodes.forEach(nodeId => {
+                        const n = nodes.find(nd => nd.id === nodeId);
+                        if (n) {
+                            selectedNodesStartPos.set(nodeId, { x: n.x, y: n.y });
+                        }
+                    });
+
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
 
@@ -709,30 +859,53 @@
 
             div.querySelector('.add-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
-                const newNode = {
-                    id: nodeIdCounter++,
+
+                const newNode = await saveNodeToDB({
                     x: node.x + 350,
                     y: node.y + (Math.random() - 0.5) * 100,
                     text: 'New Node',
-                    level: (node.level + 1) % 4
-                };
-                nodes.push(newNode);
-                await saveNode(newNode);
-                await saveSetting('nodeIdCounter', nodeIdCounter);
+                    level: (node.level + 1) % 10
+                });
 
-                const connection = { from: node.id, to: newNode.id };
+                nodes.push(newNode);
+
+                const connection = await saveConnectionToDB({
+                    from: node.id,
+                    to: newNode.id
+                });
                 connections.push(connection);
-                await saveConnection(connection);
 
                 const elem = createNodeElement(newNode);
                 canvasInner.appendChild(elem);
                 requestAnimationFrame(() => drawConnections());
+                updateStatus('Node added!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
 
                 setTimeout(() => {
                     const newTextSpan = elem.querySelector('.node-text');
                     newTextSpan.focus();
                     document.execCommand('selectAll', false, null);
                 }, 100);
+            });
+
+            div.querySelector('.level-selector').addEventListener('click', async (e) => {
+                e.stopPropagation();
+
+                // Cycle through levels 0-9
+                node.level = (node.level + 1) % 10;
+
+                // Update the node's class and level display
+                div.className = `node level-${node.level}`;
+                e.target.textContent = `L${node.level}`;
+
+                // Save to database
+                await saveNodeToDB(node);
+
+                // Redraw connections with new color
+                requestAnimationFrame(() => drawConnections());
+
+                updateStatus('Level changed!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
             });
 
             div.querySelector('.connect-btn').addEventListener('click', async (e) => {
@@ -749,10 +922,14 @@
                             (c.from === node.id && c.to === firstConnectNode.id)
                         );
                         if (!exists) {
-                            const connection = { from: firstConnectNode.id, to: node.id };
+                            const connection = await saveConnectionToDB({
+                                from: firstConnectNode.id,
+                                to: node.id
+                            });
                             connections.push(connection);
-                            await saveConnection(connection);
                             requestAnimationFrame(() => drawConnections());
+                            updateStatus('Connected!');
+                            setTimeout(() => updateStatus('Connected to Flask'), 2000);
                         }
                     }
                     document.querySelector('.connecting')?.classList.remove('connecting');
@@ -764,17 +941,20 @@
 
             div.querySelector('.delete-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
+
+                await deleteNodeFromDB(node.id);
                 nodes = nodes.filter(n => n.id !== node.id);
-                await deleteNode(node.id);
 
                 const connectionsToDelete = connections.filter(c => c.from === node.id || c.to === node.id);
                 for (const conn of connectionsToDelete) {
-                    await deleteConnection(conn.from, conn.to);
+                    await deleteConnectionFromDB(conn.from, conn.to);
                 }
                 connections = connections.filter(c => c.from !== node.id && c.to !== node.id);
 
                 div.remove();
                 requestAnimationFrame(() => drawConnections());
+                updateStatus('Deleted!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
             });
 
             return div;
@@ -880,9 +1060,100 @@
             });
         };
 
+        // Canvas mousedown for drag-to-select
+        canvasInner.addEventListener('mousedown', (e) => {
+            // Only start selection if clicking on canvas background (not on a node)
+            if (e.target === canvasInner || e.target === svg) {
+                const canvasRect = canvasInner.getBoundingClientRect();
+                selectionStart.x = e.clientX - canvasRect.left + canvas.scrollLeft;
+                selectionStart.y = e.clientY - canvasRect.top + canvas.scrollTop;
+                isSelecting = true;
+
+                // Clear previous selection if not holding shift
+                if (!e.shiftKey) {
+                    selectedNodes.forEach(nodeId => {
+                        const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                        if (elem) elem.classList.remove('selected');
+                    });
+                    selectedNodes.clear();
+                }
+
+                selectionBox.style.display = 'block';
+                selectionBox.style.left = `${selectionStart.x}px`;
+                selectionBox.style.top = `${selectionStart.y}px`;
+                selectionBox.style.width = '0px';
+                selectionBox.style.height = '0px';
+            }
+        });
+
         let rafId = null;
-        document.addEventListener('mousemove', async (e) => {
-            if (draggedNode) {
+        document.addEventListener('mousemove', (e) => {
+            if (isSelecting) {
+                const canvasRect = canvasInner.getBoundingClientRect();
+                const currentX = e.clientX - canvasRect.left + canvas.scrollLeft;
+                const currentY = e.clientY - canvasRect.top + canvas.scrollTop;
+
+                const left = Math.min(selectionStart.x, currentX);
+                const top = Math.min(selectionStart.y, currentY);
+                const width = Math.abs(currentX - selectionStart.x);
+                const height = Math.abs(currentY - selectionStart.y);
+
+                selectionBox.style.left = `${left}px`;
+                selectionBox.style.top = `${top}px`;
+                selectionBox.style.width = `${width}px`;
+                selectionBox.style.height = `${height}px`;
+
+                // Check which nodes are in selection
+                nodes.forEach(node => {
+                    const nodeRight = node.x + 200; // approximate node width
+                    const nodeBottom = node.y + 50; // approximate node height
+
+                    const isInSelection = !(
+                        node.x > left + width ||
+                        nodeRight < left ||
+                        node.y > top + height ||
+                        nodeBottom < top
+                    );
+
+                    const elem = document.querySelector(`[data-id="${node.id}"]`);
+                    if (isInSelection) {
+                        selectedNodes.add(node.id);
+                        if (elem) elem.classList.add('selected');
+                    } else if (!e.shiftKey) {
+                        selectedNodes.delete(node.id);
+                        if (elem) elem.classList.remove('selected');
+                    }
+                });
+            } else if (isDraggingSelection && selectedNodes.size > 0) {
+                if (rafId) return;
+
+                rafId = requestAnimationFrame(() => {
+                    const canvasRect = canvasInner.getBoundingClientRect();
+                    const currentX = e.clientX - canvasRect.left + canvas.scrollLeft;
+                    const currentY = e.clientY - canvasRect.top + canvas.scrollTop;
+
+                    const deltaX = currentX - selectionDragStart.x;
+                    const deltaY = currentY - selectionDragStart.y;
+
+                    selectedNodes.forEach(nodeId => {
+                        const node = nodes.find(n => n.id === nodeId);
+                        if (node) {
+                            const startPos = selectedNodesStartPos.get(nodeId);
+                            node.x = startPos.x + deltaX;
+                            node.y = startPos.y + deltaY;
+
+                            const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                            if (elem) {
+                                elem.style.left = `${node.x}px`;
+                                elem.style.top = `${node.y}px`;
+                            }
+                        }
+                    });
+
+                    drawConnections();
+                    rafId = null;
+                });
+            } else if (draggedNode) {
                 if (rafId) return;
 
                 rafId = requestAnimationFrame(() => {
@@ -904,28 +1175,44 @@
         });
 
         document.addEventListener('mouseup', async () => {
-            if (draggedNode) {
+            if (isSelecting) {
+                isSelecting = false;
+                selectionBox.style.display = 'none';
+            } else if (isDraggingSelection) {
+                isDraggingSelection = false;
+
+                // Save all moved nodes
+                for (const nodeId of selectedNodes) {
+                    const node = nodes.find(n => n.id === nodeId);
+                    if (node) {
+                        await saveNodeToDB(node);
+                    }
+                }
+                updateStatus('Positions saved!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
+            } else if (draggedNode) {
                 const elem = document.querySelector(`[data-id="${draggedNode.id}"]`);
                 elem.classList.remove('dragging');
-                await saveNode(draggedNode);
+                await saveNodeToDB(draggedNode);
+                updateStatus('Position saved!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
                 draggedNode = null;
             }
         });
 
         document.getElementById('add-node-btn').addEventListener('click', async () => {
-            const newNode = {
-                id: nodeIdCounter++,
+            const newNode = await saveNodeToDB({
                 x: 300 + Math.random() * 200,
                 y: 300 + Math.random() * 200,
                 text: 'New Node',
                 level: 0
-            };
-            nodes.push(newNode);
-            await saveNode(newNode);
-            await saveSetting('nodeIdCounter', nodeIdCounter);
+            });
 
+            nodes.push(newNode);
             const elem = createNodeElement(newNode);
             canvasInner.appendChild(elem);
+            updateStatus('Node created!');
+            setTimeout(() => updateStatus('Connected to Flask'), 2000);
 
             setTimeout(() => {
                 const textSpan = elem.querySelector('.node-text');
@@ -946,11 +1233,10 @@
         });
 
         document.querySelectorAll('.line-style-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
+            btn.addEventListener('click', () => {
                 document.querySelectorAll('.line-style-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 lineStyle = btn.dataset.style;
-                await saveSetting('lineStyle', lineStyle);
                 requestAnimationFrame(() => drawConnections());
             });
         });
@@ -964,8 +1250,8 @@
 
             rootNodes.forEach(rootNode => {
                 const tree = buildTree(rootNode.id);
-                const treeHeight = layoutTree(tree, 150, currentY, 0);
-                currentY += treeHeight + 150;
+                const treeHeight = layoutTree(tree, 250, currentY, 0);
+                currentY += treeHeight + 100;
             });
 
             nodes.forEach(node => {
@@ -1006,19 +1292,49 @@
             });
 
             for (const node of nodes) {
-                await saveNode(node);
+                await saveNodeToDB(node);
             }
+            updateStatus('Layout saved!');
+            setTimeout(() => updateStatus('Connected to Flask'), 2000);
         });
 
         document.getElementById('clear-db-btn').addEventListener('click', async () => {
             if (confirm('Are you sure you want to delete all nodes and connections? This cannot be undone.')) {
-                await clearDatabase();
+                await clearAllData();
                 nodes = [];
                 connections = [];
-                nodeIdCounter = 0;
                 canvasInner.querySelectorAll('.node').forEach(el => el.remove());
                 drawConnections();
+                updateStatus('Database cleared!');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
+
+                // Reinitialize with default data
                 await initializeApp();
+            }
+        });
+
+        // Keyboard shortcuts for selection
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + A to select all
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                nodes.forEach(node => {
+                    selectedNodes.add(node.id);
+                    const elem = document.querySelector(`[data-id="${node.id}"]`);
+                    if (elem) elem.classList.add('selected');
+                });
+                updateStatus(`${selectedNodes.size} nodes selected`);
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
+            }
+            // Escape to deselect all
+            else if (e.key === 'Escape') {
+                selectedNodes.forEach(nodeId => {
+                    const elem = document.querySelector(`[data-id="${nodeId}"]`);
+                    if (elem) elem.classList.remove('selected');
+                });
+                selectedNodes.clear();
+                updateStatus('Selection cleared');
+                setTimeout(() => updateStatus('Connected to Flask'), 2000);
             }
         });
 
@@ -1040,8 +1356,8 @@
         function layoutTree(tree, x, y, depth) {
             if (!tree) return 0;
 
-            const horizontalSpacing = 400;
-            const verticalSpacing = 80;
+            const horizontalSpacing = 500;
+            const verticalSpacing = 100;
 
             tree.node.x = x;
             tree.node.y = y;
@@ -1086,86 +1402,37 @@
         }
 
         async function initializeApp() {
-            await initDatabase();
+            try {
+                updateStatus('Loading...');
 
-            const savedNodes = await loadNodes();
-            const savedConnections = await loadConnections();
-            const savedLineStyle = await loadSetting('lineStyle');
-            const savedCounter = await loadSetting('nodeIdCounter');
+                // Initialize database
+                await initializeDatabase();
 
-            if (savedLineStyle) {
-                lineStyle = savedLineStyle;
-                document.querySelectorAll('.line-style-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.style === lineStyle);
+                // Load data from Flask backend
+                const loadedNodes = await loadNodesFromDB();
+                const loadedConnections = await loadConnectionsFromDB();
+
+                nodes = loadedNodes;
+                connections = loadedConnections;
+
+                // Clear existing DOM nodes
+                canvasInner.querySelectorAll('.node').forEach(el => el.remove());
+
+                // Create node elements
+                nodes.forEach(node => {
+                    const elem = createNodeElement(node);
+                    canvasInner.appendChild(elem);
                 });
+
+                setTimeout(() => {
+                    drawConnections();
+                    updateStatus('Connected to Flask');
+                }, 50);
+
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                updateStatus('Connection failed', true);
             }
-
-            if (savedCounter) {
-                nodeIdCounter = savedCounter;
-            }
-
-            if (savedNodes.length > 0) {
-                nodes = savedNodes;
-                connections = savedConnections;
-                nodeIdCounter = Math.max(...nodes.map(n => n.id)) + 1;
-            } else {
-                const initNodes = [
-                    { id: 0, x: 150, y: 250, text: 'Project: Ares IV Colony', level: 0 },
-                    { id: 1, x: 550, y: 180, text: 'PM: Dr. Eva Rostova', level: 1 },
-                    { id: 2, x: 950, y: 100, text: 'Senior Developers', level: 2 },
-                    { id: 3, x: 950, y: 260, text: 'Junior Developers', level: 2 },
-                    { id: 4, x: 1400, y: 50, text: 'Mika Petrova', level: 3 },
-                    { id: 5, x: 1400, y: 120, text: 'Dr. Aris Thorne', level: 3 },
-                    { id: 6, x: 1400, y: 220, text: 'Leo Kwan', level: 3 },
-                    { id: 7, x: 1400, y: 280, text: 'Ria Sharma', level: 3 },
-                    { id: 8, x: 1400, y: 340, text: 'Zane Al-Jamil', level: 3 },
-                    { id: 9, x: 150, y: 600, text: 'Project: Neptune Deep-Dive', level: 0 },
-                    { id: 10, x: 550, y: 600, text: 'PM: Jax Riley', level: 1 },
-                    { id: 11, x: 950, y: 540, text: 'Senior Developers', level: 2 },
-                    { id: 12, x: 950, y: 660, text: 'Junior Developers', level: 2 },
-                    { id: 13, x: 1400, y: 540, text: 'Kenji Tanaka', level: 3 },
-                    { id: 14, x: 1400, y: 640, text: 'Sora Kim', level: 3 },
-                    { id: 15, x: 1400, y: 700, text: "Finn O'Malley", level: 3 },
-                ];
-
-                const initConnections = [
-                    { from: 0, to: 1 },
-                    { from: 1, to: 2 },
-                    { from: 1, to: 3 },
-                    { from: 2, to: 4 },
-                    { from: 2, to: 5 },
-                    { from: 3, to: 6 },
-                    { from: 3, to: 7 },
-                    { from: 3, to: 8 },
-                    { from: 9, to: 10 },
-                    { from: 10, to: 11 },
-                    { from: 10, to: 12 },
-                    { from: 11, to: 13 },
-                    { from: 12, to: 14 },
-                    { from: 12, to: 15 },
-                ];
-
-                nodes = initNodes;
-                connections = initConnections;
-                nodeIdCounter = initNodes.length;
-
-                for (const node of initNodes) {
-                    await saveNode(node);
-                }
-                for (const conn of initConnections) {
-                    await saveConnection(conn);
-                }
-                await saveSetting('nodeIdCounter', nodeIdCounter);
-            }
-
-            nodes.forEach(node => {
-                const elem = createNodeElement(node);
-                canvasInner.appendChild(elem);
-            });
-
-            setTimeout(() => {
-                drawConnections();
-            }, 50);
         }
 
         let resizeTimeout;
@@ -1176,6 +1443,7 @@
             }, 100);
         });
 
+        // Initialize the app
         initializeApp();
     </script>
 </body>

@@ -91,9 +91,14 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/team-dashboard")
+@app.route("/team")
 def team_dashboard():
     return render_template("team_dashboard.html")
+
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 
 # ==================== API ENDPOINTS ====================
@@ -255,7 +260,7 @@ def clear_all():
 def init_db():
     db.create_all()
 
-    # Check if we need to add default data
+    #     # Check if we need to add default data
     if Node.query.count() == 0:
         default_nodes = [
             Node(id=0, x=150, y=250, text="Project: Ares IV Colony", level=0),
@@ -292,6 +297,9 @@ def init_db():
             Connection(from_node=12, to_node=14),
             Connection(from_node=12, to_node=15),
         ]
+
+        # default_nodes = []
+        # default_connections = []
 
         for node in default_nodes:
             db.session.add(node)
