@@ -37,8 +37,7 @@ htmlcov/
 .env
 .env.local
 
-# Documentation
-docs/
+# Documentation (keep essential docs in image)
 *.md
 !README.md
 

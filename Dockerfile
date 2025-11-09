@@ -8,26 +8,20 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     FLASK_APP=app.py \
-    FLASK_ENV=production
+    FLASK_ENV=production \
+    PORT=5000
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy dependency files first (for better layer caching)
+COPY requirements.txt ./
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
-    flask>=3.1.2 \
-    Flask-SQLAlchemy>=3.1.1 \
-    PyPDF2>=3.0.0 \
-    flask-cors>=5.0.0 \
-    anthropic>=0.39.0 \
-    google-generativeai>=0.8.5 \
-    python-dotenv>=1.0.0
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app.py .

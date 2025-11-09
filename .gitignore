@@ -9,3 +9,30 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database files
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Temporary files
+*.tmp
+~*
+*.bak
+
+# Logs
+*.log
+
+# Uploads (user data)
+uploads/*
+!uploads/.gitkeep

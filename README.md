@@ -418,6 +418,7 @@ See the [LICENSE](LICENSE) file for full details.
 
 **Jeevan HM**
 - GitHub: [@Jeevan-HM](https://github.com/Jeevan-HM)
+- GitHub: [@varun-163](https://github.com/varun-163)
 
 ## 🙏 Acknowledgments
 
