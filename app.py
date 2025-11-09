@@ -622,6 +622,10 @@ def create_or_update_team_member():
         db.session.add(member)
 
     db.session.commit()
+
+    # Trigger mindmap sync after member update
+    sync_mindmap_internal()
+
     return jsonify(member.to_dict())
 
 
@@ -642,6 +646,9 @@ def delete_team_member(member_id):
     # Delete the member
     db.session.delete(member)
     db.session.commit()
+
+    # Trigger mindmap sync after member deletion
+    sync_mindmap_internal()
 
     return jsonify({"success": True})
 
