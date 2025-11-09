@@ -378,6 +378,45 @@ IMPORTANT: Return ONLY the JSON object, no additional text or markdown."""
             print(f"✗ Error generating tech stack for task {task_id}: {e}")
 
 
+def sync_node_to_dashboard(node):
+    """Sync changes from mindmap node back to dashboard entities"""
+    try:
+        if node.entity_type == "project" and node.entity_id:
+            # Update project name
+            project = Project.query.get(node.entity_id)
+            if project:
+                project.name = node.text
+                db.session.commit()
+                print(f"✓ Updated project {node.entity_id}: {node.text}")
+
+        elif node.entity_type == "member" and node.entity_id:
+            # Update team member name (extract name from "Name - Role" format)
+            member = TeamMember.query.get(node.entity_id)
+            if member:
+                # Parse "Name - Role" format
+                if " - " in node.text:
+                    name, role = node.text.split(" - ", 1)
+                    member.name = name.strip()
+                    member.role = role.strip()
+                else:
+                    member.name = node.text
+                db.session.commit()
+                print(f"✓ Updated member {node.entity_id}: {node.text}")
+
+        elif node.entity_type == "task" and node.entity_id:
+            # Update task title
+            task = Task.query.get(node.entity_id)
+            if task:
+                task.title = node.text
+                task.updated_at = datetime.utcnow()
+                db.session.commit()
+                print(f"✓ Updated task {node.entity_id}: {node.text}")
+
+    except Exception as e:
+        print(f"✗ Error syncing node to dashboard: {e}")
+        db.session.rollback()
+
+
 # ==================== ROUTES ====================
 
 
@@ -401,6 +440,11 @@ def mcp_workflow():
     return render_template("mcp_project_workflow.html")
 
 
+@app.route("/mcp-tester")
+def mcp_tester():
+    return render_template("mcp_actions_tester.html")
+
+
 # ==================== API ENDPOINTS ====================
 
 
@@ -419,6 +463,7 @@ def create_or_update_node():
     if "id" in data:
         node = Node.query.get(data["id"])
         if node:
+            old_text = node.text
             node.x = data.get("x", node.x)
             node.y = data.get("y", node.y)
             node.text = data.get("text", node.text)
@@ -426,6 +471,10 @@ def create_or_update_node():
             node.entity_type = data.get("entityType", node.entity_type)
             node.entity_id = data.get("entityId", node.entity_id)
             node.updated_at = datetime.utcnow()
+
+            # If text changed and node is linked to an entity, update the entity
+            if old_text != node.text and node.entity_type and node.entity_id:
+                sync_node_to_dashboard(node)
         else:
             return jsonify({"error": "Node not found"}), 404
     else:
@@ -449,6 +498,37 @@ def delete_node(node_id):
     node = Node.query.get(node_id)
     if not node:
         return jsonify({"error": "Node not found"}), 404
+
+    # Delete linked entity from dashboard if it exists
+    if node.entity_type and node.entity_id:
+        try:
+            if node.entity_type == "project":
+                project = Project.query.get(node.entity_id)
+                if project:
+                    # Delete all tasks and assignments for this project
+                    Task.query.filter_by(project_id=project.id).delete()
+                    ProjectMember.query.filter_by(project_id=project.id).delete()
+                    db.session.delete(project)
+                    print(f"✓ Deleted project {node.entity_id} from dashboard")
+
+            elif node.entity_type == "member":
+                member = TeamMember.query.get(node.entity_id)
+                if member:
+                    # Unassign tasks
+                    Task.query.filter_by(assigned_to=member.id).update(
+                        {"assigned_to": None}
+                    )
+                    ProjectMember.query.filter_by(member_id=member.id).delete()
+                    db.session.delete(member)
+                    print(f"✓ Deleted member {node.entity_id} from dashboard")
+
+            elif node.entity_type == "task":
+                task = Task.query.get(node.entity_id)
+                if task:
+                    db.session.delete(task)
+                    print(f"✓ Deleted task {node.entity_id} from dashboard")
+        except Exception as e:
+            print(f"✗ Error deleting entity from dashboard: {e}")
 
     Connection.query.filter(
         (Connection.from_node == node_id) | (Connection.to_node == node_id)
@@ -741,9 +821,13 @@ def create_or_update_task():
 # Delete task
 @app.route("/api/tasks/<string:task_id>", methods=["DELETE"])
 def delete_task(task_id):
+    print(f"DELETE request for task_id: '{task_id}' (length: {len(task_id)})")
+
     task = Task.query.get(task_id)
     if not task:
-        return jsonify({"error": "Task not found"}), 404
+        print(f"Task not found: '{task_id}'")
+        print(f"Available task IDs: {[t.id for t in Task.query.all()[:10]]}")
+        return jsonify({"error": f"Task not found: {task_id}"}), 404
 
     db.session.delete(task)
     db.session.commit()
@@ -1056,6 +1140,49 @@ def sync_mindmap():
         return jsonify({"error": str(e)}), 500
 
 
+# Fix task IDs with spaces (cleanup utility)
+@app.route("/api/fix-task-ids", methods=["POST"])
+def fix_task_ids():
+    """Remove spaces from task IDs"""
+    try:
+        fixed_count = 0
+        tasks = Task.query.all()
+
+        for task in tasks:
+            if " " in task.id:
+                old_id = task.id
+                new_id = task.id.replace(" ", "")
+
+                # Update the task ID
+                task.id = new_id
+                fixed_count += 1
+                print(f"Fixed task ID: '{old_id}' -> '{new_id}'")
+
+        if fixed_count > 0:
+            db.session.commit()
+            # Resync mindmap after fixing IDs
+            sync_mindmap_internal()
+            return jsonify(
+                {
+                    "success": True,
+                    "message": f"Fixed {fixed_count} task ID(s)",
+                    "fixed_count": fixed_count,
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    "success": True,
+                    "message": "No task IDs needed fixing",
+                    "fixed_count": 0,
+                }
+            )
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
 # Initialize database
 @app.route("/api/init-db", methods=["POST"])
 def init_db():
@@ -1313,11 +1440,27 @@ def init_db():
                 assigned_to=None,
             ),
         ]
+        default_tasks = []
 
         for task in default_tasks:
             db.session.add(task)
 
     db.session.commit()
+
+    # Fix any task IDs with spaces (from old code)
+    fixed_count = 0
+    tasks = Task.query.all()
+    for task in tasks:
+        if " " in task.id:
+            old_id = task.id
+            new_id = task.id.replace(" ", "")
+            task.id = new_id
+            fixed_count += 1
+            print(f"Fixed task ID: '{old_id}' -> '{new_id}'")
+
+    if fixed_count > 0:
+        db.session.commit()
+        print(f"✓ Fixed {fixed_count} task ID(s) with spaces")
 
     # Sync mindmap after initialization
     sync_mindmap_internal()
@@ -1665,7 +1808,16 @@ def create_dashboard_project_from_mcp(project_id):
         subtasks = task_breakdown.get("subtasks", [])
         created_tasks = []
 
-        for idx, subtask in enumerate(subtasks[:20]):  # Allow up to 20 tasks
+        # Check if subtasks exist
+        if not subtasks or len(subtasks) == 0:
+            return jsonify(
+                {
+                    "error": "No tasks could be generated from the project analysis. The AI was unable to break down the project into actionable tasks. Please try uploading a more detailed project document or create tasks manually."
+                }
+            ), 400
+
+        # Limit to 10 tasks as requested
+        for idx, subtask in enumerate(subtasks[:10]):  # Allow up to 10 tasks
             task_id = f"{project_id_dashboard}_task_{idx + 1}"
 
             # Map priority
@@ -1981,18 +2133,18 @@ IMPORTANT: Return ONLY the JSON object, no additional text. Out of {len(task_dat
 
 def generate_task_breakdown_with_claude(project_name: str, pdf_content: str) -> dict:
     """
-    Use Claude AI to generate short detailed task breakdown and timeline from PDF content
+    Use Claude AI to generate SHORT detailed task breakdown and timeline from PDF content
     Falls back to Gemini if Claude fails
     """
     try:
-        prompt = f"""You are a project planning expert. Analyze the following project document and create a comprehensive, short detailed action plan.
+        prompt = f"""You are a project planning expert. Analyze the following project document and create a comprehensive, SHORT action plan.
 
 PROJECT NAME: {project_name}
 
 DOCUMENT CONTENT:
 {pdf_content}
 
-Please provide a short detailed analysis in JSON format with the following structure:
+Please provide a SHORT detailed analysis in JSON format with the following structure:
 
 {{
     "project_overview": {{
@@ -2050,9 +2202,26 @@ Please provide a short detailed analysis in JSON format with the following struc
     ]
 }}
 
-Be specific, and practical. Base your analysis entirely on the document content provided. Include the "required_role" field for each subtask to help with smart task assignment.
+CRITICAL INSTRUCTIONS:
+1. Generate ONLY 5-7 high-level subtasks - NO MORE than 7 tasks total
+2. Focus on MAJOR milestones and deliverables only
+3. Combine related small tasks into larger strategic tasks
+4. Make task titles clear, specific, and actionable
+5. Each task should represent a significant chunk of work (not tiny subtasks)
+6. Distribute tasks across different roles appropriately
+7. Base your analysis entirely on the document content provided
+8. Include the "required_role" field for each subtask to help with smart task assignment
+9. Return ONLY the JSON object, no additional text or markdown formatting
 
-IMPORTANT: Return ONLY the JSON object, no additional text or markdown formatting."""
+EXAMPLE OF GOOD TASK BREAKDOWN (5-7 tasks):
+- "Design and implement core authentication system"
+- "Build and deploy backend API infrastructure"
+- "Develop frontend user interface and components"
+- "Set up CI/CD pipeline and deployment automation"
+- "Implement testing suite and quality assurance"
+- "Create documentation and deployment guides"
+
+DO NOT create tiny tasks like "create button", "write function X". Think BIG picture!"""
 
         # Try Claude first
         if USE_CLAUDE and anthropic_client:
@@ -2114,9 +2283,12 @@ IMPORTANT: Return ONLY the JSON object, no additional text or markdown formattin
 
         task_data = json.loads(response_text)
 
-        # Ensure subtasks key exists and calculate total
+        # Ensure subtasks key exists and limit to 7 tasks maximum
         if "subtasks" not in task_data:
             task_data["subtasks"] = []
+
+        # LIMIT TO 7 TASKS MAXIMUM
+        task_data["subtasks"] = task_data["subtasks"][:7]
 
         task_data["total_subtasks"] = len(task_data["subtasks"])
         task_data["original_task"] = project_name
@@ -2258,4 +2430,63 @@ def generate_code_summary(project, analysis_results):
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
+
+        # Initialize default team members if none exist
+        if TeamMember.query.count() == 0:
+            default_members = [
+                TeamMember(
+                    id="tm1",
+                    name="Lucas Werner",
+                    role="Manager",
+                    avatar="LW",
+                    avatar_color="60a5fa",
+                ),
+                TeamMember(
+                    id="tm2",
+                    name="Priya Desai",
+                    role="Team Lead",
+                    avatar="PD",
+                    avatar_color="ec4899",
+                ),
+                TeamMember(
+                    id="tm3",
+                    name="Hao Nguyen",
+                    role="Principal Engineer",
+                    avatar="HN",
+                    avatar_color="f59e0b",
+                ),
+                TeamMember(
+                    id="tm4",
+                    name="Marta Kowalski",
+                    role="Senior Engineer",
+                    avatar="MK",
+                    avatar_color="8b5cf6",
+                ),
+                TeamMember(
+                    id="tm5",
+                    name="Diego Silva",
+                    role="Senior Engineer",
+                    avatar="DS",
+                    avatar_color="10b981",
+                ),
+                TeamMember(
+                    id="tm6",
+                    name="Ananya Rao",
+                    role="Associate Engineer",
+                    avatar="AR",
+                    avatar_color="ef4444",
+                ),
+                TeamMember(
+                    id="tm7",
+                    name="Ethan Brooks",
+                    role="Associate Engineer",
+                    avatar="EB",
+                    avatar_color="3b82f6",
+                ),
+            ]
+            for member in default_members:
+                db.session.add(member)
+            db.session.commit()
+            print(f"✅ Initialized {len(default_members)} default team members")
+
     app.run(debug=True, port=8000)

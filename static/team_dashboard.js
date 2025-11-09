@@ -422,6 +422,10 @@ async function renderSidebar() {
                 <i data-lucide="rocket" class="${iconClass} text-gray-400 group-hover:text-gray-300"></i>
                 Onboarding
             </a>
+            <a href="/mcp-workflow" class="mcp-workflow-link group flex items-center px-2 py-2 ${textClass} font-medium text-gray-300 rounded-md hover:text-white hover:bg-gray-700">
+                <i data-lucide="brain-circuit" class="${iconClass} text-gray-400 group-hover:text-gray-300"></i>
+                MCP Analysis
+            </a>
             <div class="mt-6">
                 <div class="flex items-center justify-between px-2 mb-2">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -522,25 +526,28 @@ async function renderMemberDirectory() {
 
     if (!container) return;
 
-    const filteredMembers = state.teamMembers.filter(member => {
+    const project = state.projects[state.currentProjectId];
+    const assignedMemberIds = project ? new Set(project.teamMembers) : new Set();
+
+    const availableMembers = state.teamMembers.filter(member => {
+        const isAssigned = assignedMemberIds.has(member.id);
+        if (isAssigned) return false;
+
         const query = state.memberSearchQuery.toLowerCase();
         return member.name.toLowerCase().includes(query) ||
             member.role.toLowerCase().includes(query);
     });
 
-    countBadge.textContent = `${filteredMembers.length} ${filteredMembers.length !== 1 ? 'members' : 'member'}`;
+    countBadge.textContent = `${availableMembers.length} ${availableMembers.length !== 1 ? 'members' : 'member'}`;
 
-    if (filteredMembers.length === 0) {
-        container.innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">No members found</p>';
+    if (availableMembers.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">No available members</p>';
         return;
     }
 
     container.innerHTML = '';
 
-    filteredMembers.forEach(member => {
-        const project = state.projects[state.currentProjectId];
-        const isAssigned = project && project.teamMembers && project.teamMembers.includes(member.id);
-
+    availableMembers.forEach(member => {
         const card = document.createElement('div');
         card.className = 'flex items-center justify-between p-3 bg-gradient-to-r from-slate-800/60 to-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all member-card cursor-move';
         card.draggable = true;
@@ -558,10 +565,7 @@ async function renderMemberDirectory() {
                 </div>
             </div>
             <div class="flex items-center space-x-2 flex-shrink-0">
-                ${isAssigned ?
-                `<span class="text-xs px-2.5 py-1 bg-emerald-500/20 text-emerald-300 rounded-full font-medium border border-emerald-500/30">In Project</span>` :
-                `<span class="text-xs px-2.5 py-1 bg-slate-700/50 text-slate-400 rounded-full font-medium border border-slate-600/50">Available</span>`
-            }
+                <span class="text-xs px-2.5 py-1 bg-slate-700/50 text-slate-400 rounded-full font-medium border border-slate-600/50">Available</span>
                 <button class="delete-member-btn text-rose-400 hover:text-rose-300 p-1.5 hover:bg-rose-500/10 rounded-lg transition-colors" onclick="deleteMemberConfirm(event, '${member.id}')">
                     <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
                 </button>
@@ -790,20 +794,33 @@ async function renderProjectBacklog() {
         taskCard.dataset.taskId = task.id;
         taskCard.dataset.projectId = project.id;
 
-        taskCard.innerHTML = `
-            <button class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" onclick="deleteTaskConfirm(event, '${task.id}')">
-                <i data-lucide="trash-2" class="h-4 w-4"></i>
-            </button>
-            <p class="text-sm font-semibold text-slate-100 pr-10">${task.title}</p>
-            <div class="mt-3 flex justify-between items-center">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${priorityClass}">
-                    ${task.priority}
-                </span>
-                <span class="text-xs font-medium text-slate-400 flex items-center">
-                    <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-slate-500"></i>
-                    ${task.deadline}
-                </span>
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'absolute top-3 right-3 opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all';
+        deleteBtn.innerHTML = '<i data-lucide="trash-2" class="h-4 w-4"></i>';
+        deleteBtn.addEventListener('click', (e) => deleteTaskConfirm(e, task.id));
+
+        const contentDiv = document.createElement('div');
+        contentDiv.innerHTML = `
+            <p class="text-sm font-semibold text-slate-100 pr-10 editable-field hover:bg-slate-700/30 rounded px-1 transition-colors cursor-text" contenteditable="true" data-task-id="${task.id}" data-field="title" title="Click to edit task title">${task.title}</p>
+            
+            <div class="mt-4 flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Priority</h4>
+                    <select class="text-xs font-semibold px-3 py-1.5 rounded-full border-0 ${priorityClass} cursor-pointer hover:opacity-80 transition-opacity" data-task-id="${task.id}" data-field="priority">
+                        <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+                        <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+                    </select>
+                </div>
+                <div class="flex-1 text-right">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-end mb-2">
+                        <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-slate-500"></i>
+                        Deadline
+                    </h4>
+                    <p class="text-sm text-slate-100 font-semibold editable-field hover:bg-slate-700/30 rounded px-1 transition-colors cursor-text" contenteditable="true" data-task-id="${task.id}" data-field="deadline" title="Click to edit deadline">${task.deadline}</p>
+                </div>
             </div>
+            
             <div class="mt-3 pt-3 border-t border-slate-700/30">
                 <p class="text-xs text-slate-400 italic flex items-center justify-center">
                     <i data-lucide="sparkles" class="mr-1.5 h-3 w-3 text-emerald-500"></i>
@@ -811,6 +828,9 @@ async function renderProjectBacklog() {
                 </p>
             </div>
         `;
+
+        taskCard.appendChild(deleteBtn);
+        taskCard.appendChild(contentDiv);
         list.appendChild(taskCard);
     });
 }
@@ -874,6 +894,7 @@ function addDragAndDropListeners() {
 
     // Add event listeners for task edits
     document.querySelectorAll('.editable-field[data-task-id]').forEach(field => {
+        // Save on blur
         field.addEventListener('blur', async () => {
             const taskId = field.dataset.taskId;
             const fieldName = field.dataset.field;
@@ -881,9 +902,33 @@ function addDragAndDropListeners() {
 
             const project = state.projects[state.currentProjectId];
             const task = project.tasks.find(t => t.id === taskId);
-            if (task) {
+            if (task && task[fieldName] !== newValue) {
+                const oldValue = task[fieldName];
                 task[fieldName] = newValue;
-                await saveTask(task);
+                try {
+                    await saveTask(task);
+                    notifications.success(`Task ${fieldName} updated`);
+                } catch (error) {
+                    task[fieldName] = oldValue; // Rollback on error
+                    notifications.error(`Failed to update task ${fieldName}`);
+                }
+            }
+        });
+
+        // Save on Enter key
+        field.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                field.blur(); // Trigger save
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                // Restore original value
+                const project = state.projects[state.currentProjectId];
+                const task = project.tasks.find(t => t.id === field.dataset.taskId);
+                if (task) {
+                    field.textContent = task[field.dataset.field];
+                }
+                field.blur();
             }
         });
     });
@@ -897,9 +942,17 @@ function addDragAndDropListeners() {
             const project = state.projects[state.currentProjectId];
             const task = project.tasks.find(t => t.id === taskId);
             if (task) {
+                const oldValue = task[fieldName];
                 task[fieldName] = newValue;
-                await saveTask(task);
-                await renderAll();
+                try {
+                    await saveTask(task);
+                    notifications.success(`Task ${fieldName} updated to ${newValue}`);
+                    await renderAll();
+                } catch (error) {
+                    task[fieldName] = oldValue; // Rollback on error
+                    notifications.error(`Failed to update task ${fieldName}`);
+                    await renderAll();
+                }
             }
         });
     });
@@ -1190,17 +1243,24 @@ async function deleteTaskConfirm(event, taskId) {
 
     const confirmed = await confirmation.show({
         title: 'Delete Task',
-        message: `Are you sure you want to delete "${task?.title || 'this task'}" ? This action cannot be undone.`,
+        message: `Are you sure you want to delete "${task?.title || 'this task'}"? This action cannot be undone.`,
         confirmText: 'Delete Task',
         type: 'danger',
         onConfirm: async () => {
-            await deleteTask(taskId);
-            project.tasks = project.tasks.filter(t => t.id !== taskId);
-            notifications.success('Task deleted successfully');
-            await renderAll();
+            try {
+                await deleteTask(taskId);
+                project.tasks = project.tasks.filter(t => t.id !== taskId);
+                notifications.success('Task deleted successfully');
+                await renderAll();
 
-            // Sync with mindmap
-            await syncMindmap();
+                // Sync with mindmap
+                await syncMindmap();
+            } catch (error) {
+                notifications.error('Failed to delete task. It may not exist anymore.');
+                // Reload projects to sync with server
+                await loadProjects();
+                await renderAll();
+            }
         }
     });
 }
@@ -1446,7 +1506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const project = state.projects[state.currentProjectId];
             const projectPrefix = state.currentProjectId.substring(0, 1);
             const taskCount = project.tasks.length;
-            const newTaskId = `${projectPrefix} -t${taskCount + 1} `;
+            const newTaskId = `${projectPrefix}-t${taskCount + 1}`;
 
             const newTask = {
                 id: newTaskId,
@@ -1918,25 +1978,60 @@ window.addEventListener('beforeunload', () => {
 
 // Team Management Modal Functions
 function openManageTeamModal() {
+    console.log('openManageTeamModal called');
+    console.log('currentProjectId:', state.currentProjectId);
+    console.log('projects:', state.projects);
+
     const project = state.projects[state.currentProjectId];
-    if (!project) return;
+    if (!project) {
+        console.error('No project found for ID:', state.currentProjectId);
+        notifications.error('Please select a project first');
+        return;
+    }
 
     const modal = document.getElementById('manage-team-modal');
     const projectNameEl = document.getElementById('manage-team-project-name');
 
-    projectNameEl.textContent = project.name;
+    if (!modal) {
+        console.error('manage-team-modal element not found');
+        notifications.error('Modal element not found');
+        return;
+    }
+
+    if (projectNameEl) {
+        projectNameEl.textContent = project.name;
+    }
+
     modal.classList.remove('hidden');
 
     renderTeamManagementModal();
 }
 
 function renderTeamManagementModal() {
+    console.log('renderTeamManagementModal called');
+
     const project = state.projects[state.currentProjectId];
-    if (!project) return;
+    if (!project) {
+        console.error('No project found in renderTeamManagementModal');
+        return;
+    }
 
     const currentTeamList = document.getElementById('current-team-list');
     const availableMembersList = document.getElementById('available-members-list');
     const noTeamMembers = document.getElementById('no-team-members');
+
+    if (!currentTeamList || !availableMembersList || !noTeamMembers) {
+        console.error('Required modal elements not found:', {
+            currentTeamList: !!currentTeamList,
+            availableMembersList: !!availableMembersList,
+            noTeamMembers: !!noTeamMembers
+        });
+        return;
+    }
+
+    console.log('project.teamMembers:', project.teamMembers);
+    console.log('state.teamMembers:', state.teamMembers);
+    console.log('state.members:', state.members);
 
     // Get current team members
     const currentTeamMembers = state.teamMembers.filter(m =>
@@ -1951,6 +2046,9 @@ function renderTeamManagementModal() {
         return m.name.toLowerCase().includes(query) || m.role.toLowerCase().includes(query);
     });
 
+    console.log('currentTeamMembers:', currentTeamMembers);
+    console.log('availableMembers:', availableMembers);
+
     // Render current team
     if (currentTeamMembers.length === 0) {
         noTeamMembers.classList.remove('hidden');
@@ -1961,11 +2059,11 @@ function renderTeamManagementModal() {
             <div class="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200">
                 <div class="flex items-center space-x-3">
                     <img class="w-8 h-8 rounded-full" 
-                         src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
+                         src="https://placehold.co/100x100/${member.avatarColor || '3B82F6'}/ffffff?text=${member.avatar || member.name.charAt(0)}" 
                          alt="${member.name}">
                     <div>
                         <h5 class="text-sm font-semibold text-gray-900">${member.name}</h5>
-                        <p class="text-xs text-gray-600">${member.role}</p>
+                        <p class="text-xs text-gray-600">${member.role || 'Team Member'}</p>
                     </div>
                 </div>
                 <button onclick="removeMemberFromTeam('${member.id}')" 
@@ -1984,11 +2082,11 @@ function renderTeamManagementModal() {
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
                 <div class="flex items-center space-x-3">
                     <img class="w-8 h-8 rounded-full" 
-                         src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
+                         src="https://placehold.co/100x100/${member.avatarColor || '6B7280'}/ffffff?text=${member.avatar || member.name.charAt(0)}" 
                          alt="${member.name}">
                     <div>
                         <h5 class="text-sm font-semibold text-gray-900">${member.name}</h5>
-                        <p class="text-xs text-gray-600">${member.role}</p>
+                        <p class="text-xs text-gray-600">${member.role || 'Team Member'}</p>
                     </div>
                 </div>
                 <button onclick="addMemberToTeam('${member.id}')" 
@@ -1997,6 +2095,17 @@ function renderTeamManagementModal() {
                 </button>
             </div>
     `).join('');
+    }
+
+    // Update badge counts
+    const teamCountBadge = document.getElementById('team-count-badge');
+    const availableCountBadge = document.getElementById('available-count-badge');
+
+    if (teamCountBadge) {
+        teamCountBadge.textContent = currentTeamMembers.length;
+    }
+    if (availableCountBadge) {
+        availableCountBadge.textContent = availableMembers.length;
     }
 
     if (typeof lucide !== 'undefined' && lucide.createIcons) {

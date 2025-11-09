@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Mindmap - Visual Database</title>
+    <title>Project Mindmap - ShipShape</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap"
         rel="stylesheet">
@@ -1074,12 +1074,14 @@
             });
         });
 
+        // Complete organize button event listener with fixed positioning
         document.getElementById('organize-btn').addEventListener('click', async () => {
             const rootNodes = nodes.filter(node =>
                 !connections.some(conn => conn.to === node.id)
             );
 
-            let currentY = 150;
+            // Start positioning below the header with safe margin (header is 68px + status indicator)
+            let currentY = 200;
 
             rootNodes.forEach(rootNode => {
                 const tree = buildTree(rootNode.id);
@@ -1131,6 +1133,7 @@
             setTimeout(() => updateStatus('Connected to Database'), 2000);
         });
 
+        // Build tree helper function
         function buildTree(nodeId, visited = new Set()) {
             if (visited.has(nodeId)) return null;
             visited.add(nodeId);
@@ -1146,14 +1149,19 @@
             return { node, children };
         }
 
+        // Layout tree helper function with navbar fix
         function layoutTree(tree, x, y, depth) {
             if (!tree) return 0;
 
             const horizontalSpacing = 500;
             const verticalSpacing = 100;
+            const minY = 150; // Minimum Y position to avoid header
+
+            // Ensure node doesn't go above the safe zone
+            const safeY = Math.max(minY, y);
 
             tree.node.x = x;
-            tree.node.y = y;
+            tree.node.y = safeY;
 
             if (tree.children.length === 0) {
                 return verticalSpacing;
@@ -1166,9 +1174,11 @@
                 return height;
             });
 
-            const childrenStartY = y - (totalHeight - verticalSpacing) / 2;
+            const childrenStartY = safeY - (totalHeight - verticalSpacing) / 2;
+            // Ensure children also stay in safe zone
+            const safeChildrenStartY = Math.max(minY, childrenStartY);
 
-            let currentChildY = childrenStartY;
+            let currentChildY = safeChildrenStartY;
             tree.children.forEach((child, index) => {
                 const childHeight = layoutTree(
                     child,
@@ -1182,6 +1192,7 @@
             return totalHeight;
         }
 
+        // Calculate tree height helper function
         function calculateTreeHeight(tree, spacing) {
             if (!tree || tree.children.length === 0) {
                 return spacing;
