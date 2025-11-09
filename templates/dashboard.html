@@ -34,7 +34,6 @@
             color: var(--star-white);
         }
 
-        /* Subtle animated background */
         body::before {
             content: '';
             position: fixed;
@@ -151,6 +150,17 @@
 
         .btn:active {
             transform: translateY(0);
+        }
+
+        .btn.danger {
+            background: rgba(255, 0, 229, 0.1);
+            border-color: rgba(255, 0, 229, 0.3);
+            color: var(--neon-magenta);
+        }
+
+        .btn.danger:hover {
+            background: rgba(255, 0, 229, 0.2);
+            border-color: var(--neon-magenta);
         }
 
         .canvas {
@@ -306,7 +316,6 @@
             box-shadow: 0 0 12px rgba(255, 0, 229, 0.4);
         }
 
-        /* Level colors with smooth glow */
         .node.level-0 {
             border-color: var(--neon-cyan);
             box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
@@ -343,7 +352,6 @@
             box-shadow: 0 6px 30px rgba(0, 255, 136, 0.4);
         }
 
-        /* Smooth connection lines */
         .connection-line {
             stroke-width: 2;
             fill: none;
@@ -390,7 +398,44 @@
             }
         }
 
-        /* Scrollbar styling */
+        .status-indicator {
+            position: fixed;
+            top: 90px;
+            right: 40px;
+            padding: 8px 16px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            color: var(--neon-green);
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--neon-green);
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
         .canvas::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -440,9 +485,16 @@
                 <button class="line-style-btn" data-style="straight">Straight</button>
                 <button class="line-style-btn" data-style="step">Step</button>
             </div>
+            <button class="btn" id="organize-btn">✨ Auto Organize</button>
             <button class="btn" id="add-node-btn">+ Add Node</button>
             <button class="btn" id="connect-mode-btn">🔗 Connect</button>
+            <button class="btn danger" id="clear-db-btn">🗑️ Clear All</button>
         </div>
+    </div>
+
+    <div class="status-indicator">
+        <div class="status-dot"></div>
+        <span>Auto-saving to database</span>
     </div>
 
     <div class="canvas" id="canvas">
@@ -456,6 +508,130 @@
     </div>
 
     <script>
+        // ==================== DATABASE SETUP ====================
+        let db;
+        const DB_NAME = 'ProjectTrackerDB';
+        const DB_VERSION = 1;
+
+        function initDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+
+                    // Create nodes store
+                    if (!db.objectStoreNames.contains('nodes')) {
+                        const nodeStore = db.createObjectStore('nodes', { keyPath: 'id' });
+                        nodeStore.createIndex('level', 'level', { unique: false });
+                    }
+
+                    // Create connections store
+                    if (!db.objectStoreNames.contains('connections')) {
+                        db.createObjectStore('connections', { keyPath: 'id', autoIncrement: true });
+                    }
+
+                    // Create settings store
+                    if (!db.objectStoreNames.contains('settings')) {
+                        db.createObjectStore('settings', { keyPath: 'key' });
+                    }
+                };
+            });
+        }
+
+        // Save node to database
+        async function saveNode(node) {
+            const transaction = db.transaction(['nodes'], 'readwrite');
+            const store = transaction.objectStore('nodes');
+            await store.put(node);
+        }
+
+        // Delete node from database
+        async function deleteNode(nodeId) {
+            const transaction = db.transaction(['nodes'], 'readwrite');
+            const store = transaction.objectStore('nodes');
+            await store.delete(nodeId);
+        }
+
+        // Load all nodes from database
+        async function loadNodes() {
+            const transaction = db.transaction(['nodes'], 'readonly');
+            const store = transaction.objectStore('nodes');
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Save connection to database
+        async function saveConnection(connection) {
+            const transaction = db.transaction(['connections'], 'readwrite');
+            const store = transaction.objectStore('connections');
+            await store.put(connection);
+        }
+
+        // Delete connection from database
+        async function deleteConnection(from, to) {
+            const transaction = db.transaction(['connections'], 'readonly');
+            const store = transaction.objectStore('connections');
+            const request = store.getAll();
+
+            request.onsuccess = async () => {
+                const connections = request.result;
+                const conn = connections.find(c => c.from === from && c.to === to);
+                if (conn) {
+                    const deleteTransaction = db.transaction(['connections'], 'readwrite');
+                    const deleteStore = deleteTransaction.objectStore('connections');
+                    await deleteStore.delete(conn.id);
+                }
+            };
+        }
+
+        // Load all connections from database
+        async function loadConnections() {
+            const transaction = db.transaction(['connections'], 'readonly');
+            const store = transaction.objectStore('connections');
+            return new Promise((resolve, reject) => {
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Save settings
+        async function saveSetting(key, value) {
+            const transaction = db.transaction(['settings'], 'readwrite');
+            const store = transaction.objectStore('settings');
+            await store.put({ key, value });
+        }
+
+        // Load setting
+        async function loadSetting(key) {
+            const transaction = db.transaction(['settings'], 'readonly');
+            const store = transaction.objectStore('settings');
+            return new Promise((resolve, reject) => {
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result ? request.result.value : null);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        // Clear entire database
+        async function clearDatabase() {
+            const transaction = db.transaction(['nodes', 'connections', 'settings'], 'readwrite');
+            await transaction.objectStore('nodes').clear();
+            await transaction.objectStore('connections').clear();
+            await transaction.objectStore('settings').clear();
+        }
+
+        // ==================== APP LOGIC ====================
         const canvas = document.getElementById('canvas');
         const canvasInner = document.getElementById('canvas-inner');
         const svg = document.getElementById('connector-svg');
@@ -468,54 +644,14 @@
         let dragOffset = { x: 0, y: 0 };
         let connectMode = false;
         let firstConnectNode = null;
-        let lineStyle = 'curved'; // curved, straight, or step
+        let lineStyle = 'curved';
 
-        // Color palette for connection lines
         const lineColors = {
             0: 'rgba(0, 240, 255, 0.7)',
             1: 'rgba(255, 0, 229, 0.7)',
             2: 'rgba(255, 213, 0, 0.7)',
             3: 'rgba(0, 255, 136, 0.7)'
         };
-
-        // Initialize with hierarchical layout - well-spaced
-        const initNodes = [
-            { id: 0, x: 150, y: 250, text: 'Project: Ares IV Colony', level: 0 },
-            { id: 1, x: 550, y: 180, text: 'PM: Dr. Eva Rostova', level: 1 },
-            { id: 2, x: 950, y: 100, text: 'Senior Developers', level: 2 },
-            { id: 3, x: 950, y: 260, text: 'Junior Developers', level: 2 },
-            { id: 4, x: 1400, y: 50, text: 'Mika Petrova', level: 3 },
-            { id: 5, x: 1400, y: 120, text: 'Dr. Aris Thorne', level: 3 },
-            { id: 6, x: 1400, y: 220, text: 'Leo Kwan', level: 3 },
-            { id: 7, x: 1400, y: 280, text: 'Ria Sharma', level: 3 },
-            { id: 8, x: 1400, y: 340, text: 'Zane Al-Jamil', level: 3 },
-            { id: 9, x: 150, y: 600, text: 'Project: Neptune Deep-Dive', level: 0 },
-            { id: 10, x: 550, y: 600, text: 'PM: Jax Riley', level: 1 },
-            { id: 11, x: 950, y: 540, text: 'Senior Developers', level: 2 },
-            { id: 12, x: 950, y: 660, text: 'Junior Developers', level: 2 },
-            { id: 13, x: 1400, y: 540, text: 'Kenji Tanaka', level: 3 },
-            { id: 14, x: 1400, y: 640, text: 'Sora Kim', level: 3 },
-            { id: 15, x: 1400, y: 700, text: "Finn O'Malley", level: 3 },
-        ];
-
-        const initConnections = [
-            { from: 0, to: 1 },
-            { from: 1, to: 2 },
-            { from: 1, to: 3 },
-            { from: 2, to: 4 },
-            { from: 2, to: 5 },
-            { from: 3, to: 6 },
-            { from: 3, to: 7 },
-            { from: 3, to: 8 },
-            { from: 9, to: 10 },
-            { from: 10, to: 11 },
-            { from: 10, to: 12 },
-            { from: 11, to: 13 },
-            { from: 12, to: 14 },
-            { from: 12, to: 15 },
-        ];
-
-        nodeIdCounter = initNodes.length;
 
         const createNodeElement = (node) => {
             const div = document.createElement('div');
@@ -546,11 +682,16 @@
                 }
             });
 
-            textSpan.addEventListener('blur', () => {
+            textSpan.addEventListener('blur', async () => {
                 node.text = textSpan.textContent;
+                await saveNode(node);
+                requestAnimationFrame(() => drawConnections());
             });
 
-            // Smooth drag functionality
+            textSpan.addEventListener('input', () => {
+                requestAnimationFrame(() => drawConnections());
+            });
+
             div.addEventListener('mousedown', (e) => {
                 if (e.target.closest('.icon-btn') || e.target === textSpan) {
                     return;
@@ -566,8 +707,7 @@
                 e.preventDefault();
             });
 
-            // Add child button
-            div.querySelector('.add-btn').addEventListener('click', (e) => {
+            div.querySelector('.add-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const newNode = {
                     id: nodeIdCounter++,
@@ -577,7 +717,13 @@
                     level: (node.level + 1) % 4
                 };
                 nodes.push(newNode);
-                connections.push({ from: node.id, to: newNode.id });
+                await saveNode(newNode);
+                await saveSetting('nodeIdCounter', nodeIdCounter);
+
+                const connection = { from: node.id, to: newNode.id };
+                connections.push(connection);
+                await saveConnection(connection);
+
                 const elem = createNodeElement(newNode);
                 canvasInner.appendChild(elem);
                 requestAnimationFrame(() => drawConnections());
@@ -589,8 +735,7 @@
                 }, 100);
             });
 
-            // Connect button
-            div.querySelector('.connect-btn').addEventListener('click', (e) => {
+            div.querySelector('.connect-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (!connectMode) {
                     connectMode = true;
@@ -604,7 +749,9 @@
                             (c.from === node.id && c.to === firstConnectNode.id)
                         );
                         if (!exists) {
-                            connections.push({ from: firstConnectNode.id, to: node.id });
+                            const connection = { from: firstConnectNode.id, to: node.id };
+                            connections.push(connection);
+                            await saveConnection(connection);
                             requestAnimationFrame(() => drawConnections());
                         }
                     }
@@ -615,11 +762,17 @@
                 }
             });
 
-            // Delete button
-            div.querySelector('.delete-btn').addEventListener('click', (e) => {
+            div.querySelector('.delete-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 nodes = nodes.filter(n => n.id !== node.id);
+                await deleteNode(node.id);
+
+                const connectionsToDelete = connections.filter(c => c.from === node.id || c.to === node.id);
+                for (const conn of connectionsToDelete) {
+                    await deleteConnection(conn.from, conn.to);
+                }
                 connections = connections.filter(c => c.from !== node.id && c.to !== node.id);
+
                 div.remove();
                 requestAnimationFrame(() => drawConnections());
             });
@@ -643,65 +796,47 @@
                         const toRect = toEl.getBoundingClientRect();
                         const canvasRect = canvasInner.getBoundingClientRect();
 
-                        // Calculate center points
                         const fromCenterX = fromRect.left + fromRect.width / 2 - canvasRect.left;
                         const fromCenterY = fromRect.top + fromRect.height / 2 - canvasRect.top;
                         const toCenterX = toRect.left + toRect.width / 2 - canvasRect.left;
                         const toCenterY = toRect.top + toRect.height / 2 - canvasRect.top;
 
-                        // Calculate angle between nodes
                         const dx = toCenterX - fromCenterX;
                         const dy = toCenterY - fromCenterY;
-                        const angle = Math.atan2(dy, dx);
 
-                        // Determine connection points based on relative positions
                         let x1, y1, x2, y2;
 
-                        // From node connection point
                         if (Math.abs(dx) > Math.abs(dy)) {
-                            // Horizontal connection dominant
                             if (dx > 0) {
-                                // Connect from right side of fromNode
                                 x1 = fromRect.right - canvasRect.left;
                                 y1 = fromCenterY;
                             } else {
-                                // Connect from left side of fromNode
                                 x1 = fromRect.left - canvasRect.left;
                                 y1 = fromCenterY;
                             }
                         } else {
-                            // Vertical connection dominant
                             if (dy > 0) {
-                                // Connect from bottom of fromNode
                                 x1 = fromCenterX;
                                 y1 = fromRect.bottom - canvasRect.top;
                             } else {
-                                // Connect from top of fromNode
                                 x1 = fromCenterX;
                                 y1 = fromRect.top - canvasRect.top;
                             }
                         }
 
-                        // To node connection point
                         if (Math.abs(dx) > Math.abs(dy)) {
-                            // Horizontal connection dominant
                             if (dx > 0) {
-                                // Connect to left side of toNode
                                 x2 = toRect.left - canvasRect.left;
                                 y2 = toCenterY;
                             } else {
-                                // Connect to right side of toNode
                                 x2 = toRect.right - canvasRect.left;
                                 y2 = toCenterY;
                             }
                         } else {
-                            // Vertical connection dominant
                             if (dy > 0) {
-                                // Connect to top of toNode
                                 x2 = toCenterX;
                                 y2 = toRect.top - canvasRect.top;
                             } else {
-                                // Connect to bottom of toNode
                                 x2 = toCenterX;
                                 y2 = toRect.bottom - canvasRect.top;
                             }
@@ -710,21 +845,16 @@
                         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         let d;
 
-                        // Calculate if the connection is nearly straight
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         const isNearlyHorizontal = Math.abs(dy) < 20 && Math.abs(dx) > 50;
                         const isNearlyVertical = Math.abs(dx) < 20 && Math.abs(dy) > 50;
                         const isNearlyStraight = isNearlyHorizontal || isNearlyVertical;
 
                         if (lineStyle === 'curved' && !isNearlyStraight) {
-                            const controlOffset = Math.min(distance * 0.25, 150);
-
                             if (Math.abs(dx) > Math.abs(dy)) {
-                                // Horizontal curve - gentler
                                 const offsetX = Math.abs(dx) * 0.3;
                                 d = `M ${x1} ${y1} C ${x1 + (dx > 0 ? offsetX : -offsetX)} ${y1}, ${x2 - (dx > 0 ? offsetX : -offsetX)} ${y2}, ${x2} ${y2}`;
                             } else {
-                                // Vertical curve - gentler
                                 const offsetY = Math.abs(dy) * 0.3;
                                 d = `M ${x1} ${y1} C ${x1} ${y1 + (dy > 0 ? offsetY : -offsetY)}, ${x2} ${y2 - (dy > 0 ? offsetY : -offsetY)}, ${x2} ${y2}`;
                             }
@@ -732,11 +862,9 @@
                             d = `M ${x1} ${y1} L ${x2} ${y2}`;
                         } else if (lineStyle === 'step') {
                             if (Math.abs(dx) > Math.abs(dy)) {
-                                // Horizontal-first step
                                 const midX = (x1 + x2) / 2;
                                 d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
                             } else {
-                                // Vertical-first step
                                 const midY = (y1 + y2) / 2;
                                 d = `M ${x1} ${y1} L ${x1} ${midY} L ${x2} ${midY} L ${x2} ${y2}`;
                             }
@@ -752,9 +880,8 @@
             });
         };
 
-        // Optimized mouse move with RAF
         let rafId = null;
-        document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', async (e) => {
             if (draggedNode) {
                 if (rafId) return;
 
@@ -776,16 +903,16 @@
             }
         });
 
-        document.addEventListener('mouseup', () => {
+        document.addEventListener('mouseup', async () => {
             if (draggedNode) {
                 const elem = document.querySelector(`[data-id="${draggedNode.id}"]`);
                 elem.classList.remove('dragging');
+                await saveNode(draggedNode);
                 draggedNode = null;
             }
         });
 
-        // Add node button
-        document.getElementById('add-node-btn').addEventListener('click', () => {
+        document.getElementById('add-node-btn').addEventListener('click', async () => {
             const newNode = {
                 id: nodeIdCounter++,
                 x: 300 + Math.random() * 200,
@@ -794,6 +921,9 @@
                 level: 0
             };
             nodes.push(newNode);
+            await saveNode(newNode);
+            await saveSetting('nodeIdCounter', nodeIdCounter);
+
             const elem = createNodeElement(newNode);
             canvasInner.appendChild(elem);
 
@@ -804,7 +934,6 @@
             }, 100);
         });
 
-        // Connect mode button
         document.getElementById('connect-mode-btn').addEventListener('click', () => {
             connectMode = !connectMode;
             if (connectMode) {
@@ -816,29 +945,229 @@
             }
         });
 
-        // Line style selector
         document.querySelectorAll('.line-style-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 document.querySelectorAll('.line-style-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 lineStyle = btn.dataset.style;
+                await saveSetting('lineStyle', lineStyle);
                 requestAnimationFrame(() => drawConnections());
             });
         });
 
-        // Initialize
-        nodes = initNodes;
-        connections = initConnections;
-        initNodes.forEach(node => {
-            const elem = createNodeElement(node);
-            canvasInner.appendChild(elem);
+        document.getElementById('organize-btn').addEventListener('click', async () => {
+            const rootNodes = nodes.filter(node =>
+                !connections.some(conn => conn.to === node.id)
+            );
+
+            let currentY = 150;
+
+            rootNodes.forEach(rootNode => {
+                const tree = buildTree(rootNode.id);
+                const treeHeight = layoutTree(tree, 150, currentY, 0);
+                currentY += treeHeight + 150;
+            });
+
+            nodes.forEach(node => {
+                const elem = document.querySelector(`[data-id="${node.id}"]`);
+                if (elem) {
+                    elem.style.left = `${node.x}px`;
+                    elem.style.top = `${node.y}px`;
+                }
+            });
+
+            requestAnimationFrame(() => {
+                nodes.forEach(node => {
+                    const elem = document.querySelector(`[data-id="${node.id}"]`);
+                    if (elem) {
+                        elem.style.transition = 'left 0.5s ease, top 0.5s ease';
+                    }
+                });
+
+                const startTime = performance.now();
+                const animationDuration = 500;
+
+                const animateConnections = (currentTime) => {
+                    drawConnections();
+
+                    if (currentTime - startTime < animationDuration) {
+                        requestAnimationFrame(animateConnections);
+                    } else {
+                        nodes.forEach(node => {
+                            const elem = document.querySelector(`[data-id="${node.id}"]`);
+                            if (elem) {
+                                elem.style.transition = '';
+                            }
+                        });
+                    }
+                };
+
+                requestAnimationFrame(animateConnections);
+            });
+
+            for (const node of nodes) {
+                await saveNode(node);
+            }
         });
 
-        setTimeout(() => {
-            drawConnections();
-        }, 50);
+        document.getElementById('clear-db-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to delete all nodes and connections? This cannot be undone.')) {
+                await clearDatabase();
+                nodes = [];
+                connections = [];
+                nodeIdCounter = 0;
+                canvasInner.querySelectorAll('.node').forEach(el => el.remove());
+                drawConnections();
+                await initializeApp();
+            }
+        });
 
-        // Smooth redraw on resize with debounce
+        function buildTree(nodeId, visited = new Set()) {
+            if (visited.has(nodeId)) return null;
+            visited.add(nodeId);
+
+            const node = nodes.find(n => n.id === nodeId);
+            if (!node) return null;
+
+            const children = connections
+                .filter(conn => conn.from === nodeId)
+                .map(conn => buildTree(conn.to, visited))
+                .filter(child => child !== null);
+
+            return { node, children };
+        }
+
+        function layoutTree(tree, x, y, depth) {
+            if (!tree) return 0;
+
+            const horizontalSpacing = 400;
+            const verticalSpacing = 80;
+
+            tree.node.x = x;
+            tree.node.y = y;
+
+            if (tree.children.length === 0) {
+                return verticalSpacing;
+            }
+
+            let totalHeight = 0;
+            const childHeights = tree.children.map(child => {
+                const height = calculateTreeHeight(child, verticalSpacing);
+                totalHeight += height;
+                return height;
+            });
+
+            const childrenStartY = y - (totalHeight - verticalSpacing) / 2;
+
+            let currentChildY = childrenStartY;
+            tree.children.forEach((child, index) => {
+                const childHeight = layoutTree(
+                    child,
+                    x + horizontalSpacing,
+                    currentChildY + childHeights[index] / 2,
+                    depth + 1
+                );
+                currentChildY += childHeights[index];
+            });
+
+            return totalHeight;
+        }
+
+        function calculateTreeHeight(tree, spacing) {
+            if (!tree || tree.children.length === 0) {
+                return spacing;
+            }
+
+            const childrenHeight = tree.children.reduce((sum, child) => {
+                return sum + calculateTreeHeight(child, spacing);
+            }, 0);
+
+            return Math.max(spacing, childrenHeight);
+        }
+
+        async function initializeApp() {
+            await initDatabase();
+
+            const savedNodes = await loadNodes();
+            const savedConnections = await loadConnections();
+            const savedLineStyle = await loadSetting('lineStyle');
+            const savedCounter = await loadSetting('nodeIdCounter');
+
+            if (savedLineStyle) {
+                lineStyle = savedLineStyle;
+                document.querySelectorAll('.line-style-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.style === lineStyle);
+                });
+            }
+
+            if (savedCounter) {
+                nodeIdCounter = savedCounter;
+            }
+
+            if (savedNodes.length > 0) {
+                nodes = savedNodes;
+                connections = savedConnections;
+                nodeIdCounter = Math.max(...nodes.map(n => n.id)) + 1;
+            } else {
+                const initNodes = [
+                    { id: 0, x: 150, y: 250, text: 'Project: Ares IV Colony', level: 0 },
+                    { id: 1, x: 550, y: 180, text: 'PM: Dr. Eva Rostova', level: 1 },
+                    { id: 2, x: 950, y: 100, text: 'Senior Developers', level: 2 },
+                    { id: 3, x: 950, y: 260, text: 'Junior Developers', level: 2 },
+                    { id: 4, x: 1400, y: 50, text: 'Mika Petrova', level: 3 },
+                    { id: 5, x: 1400, y: 120, text: 'Dr. Aris Thorne', level: 3 },
+                    { id: 6, x: 1400, y: 220, text: 'Leo Kwan', level: 3 },
+                    { id: 7, x: 1400, y: 280, text: 'Ria Sharma', level: 3 },
+                    { id: 8, x: 1400, y: 340, text: 'Zane Al-Jamil', level: 3 },
+                    { id: 9, x: 150, y: 600, text: 'Project: Neptune Deep-Dive', level: 0 },
+                    { id: 10, x: 550, y: 600, text: 'PM: Jax Riley', level: 1 },
+                    { id: 11, x: 950, y: 540, text: 'Senior Developers', level: 2 },
+                    { id: 12, x: 950, y: 660, text: 'Junior Developers', level: 2 },
+                    { id: 13, x: 1400, y: 540, text: 'Kenji Tanaka', level: 3 },
+                    { id: 14, x: 1400, y: 640, text: 'Sora Kim', level: 3 },
+                    { id: 15, x: 1400, y: 700, text: "Finn O'Malley", level: 3 },
+                ];
+
+                const initConnections = [
+                    { from: 0, to: 1 },
+                    { from: 1, to: 2 },
+                    { from: 1, to: 3 },
+                    { from: 2, to: 4 },
+                    { from: 2, to: 5 },
+                    { from: 3, to: 6 },
+                    { from: 3, to: 7 },
+                    { from: 3, to: 8 },
+                    { from: 9, to: 10 },
+                    { from: 10, to: 11 },
+                    { from: 10, to: 12 },
+                    { from: 11, to: 13 },
+                    { from: 12, to: 14 },
+                    { from: 12, to: 15 },
+                ];
+
+                nodes = initNodes;
+                connections = initConnections;
+                nodeIdCounter = initNodes.length;
+
+                for (const node of initNodes) {
+                    await saveNode(node);
+                }
+                for (const conn of initConnections) {
+                    await saveConnection(conn);
+                }
+                await saveSetting('nodeIdCounter', nodeIdCounter);
+            }
+
+            nodes.forEach(node => {
+                const elem = createNodeElement(node);
+                canvasInner.appendChild(elem);
+            });
+
+            setTimeout(() => {
+                drawConnections();
+            }, 50);
+        }
+
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
@@ -846,6 +1175,8 @@
                 requestAnimationFrame(() => drawConnections());
             }, 100);
         });
+
+        initializeApp();
     </script>
 </body>
 
