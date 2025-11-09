@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Tracker</title>
+    <title>Project Mindmap - Visual Database</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap"
         rel="stylesheet">
@@ -82,6 +82,12 @@
             align-items: center;
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
         h1 {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.8rem;
@@ -92,6 +98,30 @@
             background-clip: text;
             text-transform: uppercase;
             letter-spacing: 0.15rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            color: var(--neon-cyan);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .nav-link:hover {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--neon-cyan);
+            transform: translateY(-1px);
         }
 
         .controls {
@@ -156,17 +186,6 @@
 
         .btn:active {
             transform: translateY(0);
-        }
-
-        .btn.danger {
-            background: rgba(255, 0, 229, 0.1);
-            border-color: rgba(255, 0, 229, 0.3);
-            color: var(--neon-magenta);
-        }
-
-        .btn.danger:hover {
-            background: rgba(255, 0, 229, 0.2);
-            border-color: var(--neon-magenta);
         }
 
         .canvas {
@@ -272,138 +291,41 @@
             display: flex;
             gap: 6px;
             align-items: center;
-            opacity: 0;
-            transition: opacity 0.2s ease;
         }
 
-        .node:hover .node-controls {
-            opacity: 1;
-        }
-
-        .icon-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 1.5px solid;
-            background: rgba(10, 14, 39, 0.6);
-            font-size: 0.85rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            flex-shrink: 0;
-        }
-
-        .level-selector {
-            position: relative;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid;
-            background: rgba(10, 14, 39, 0.8);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .level-selector:hover {
-            transform: scale(1.15);
-        }
-
-        .node.level-0 .level-selector {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
-        }
-
-        .node.level-1 .level-selector {
-            border-color: var(--neon-magenta);
-            color: var(--neon-magenta);
-        }
-
-        .node.level-2 .level-selector {
-            border-color: var(--neon-yellow);
+        .mode-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 28px;
+            background: rgba(26, 29, 58, 0.9);
+            border: 1px solid var(--neon-yellow);
+            border-radius: 20px;
             color: var(--neon-yellow);
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(255, 213, 0, 0.3);
         }
 
-        .node.level-3 .level-selector {
-            border-color: var(--neon-green);
-            color: var(--neon-green);
+        .mode-indicator.active {
+            display: block;
+            animation: slide-up 0.2s ease;
         }
 
-        .node.level-4 .level-selector {
-            border-color: var(--neon-orange);
-            color: var(--neon-orange);
-        }
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
 
-        .node.level-5 .level-selector {
-            border-color: var(--neon-purple);
-            color: var(--neon-purple);
-        }
-
-        .node.level-6 .level-selector {
-            border-color: var(--neon-pink);
-            color: var(--neon-pink);
-        }
-
-        .node.level-7 .level-selector {
-            border-color: var(--neon-blue);
-            color: var(--neon-blue);
-        }
-
-        .node.level-8 .level-selector {
-            border-color: var(--neon-lime);
-            color: var(--neon-lime);
-        }
-
-        .node.level-9 .level-selector {
-            border-color: var(--neon-red);
-            color: var(--neon-red);
-        }
-
-        .icon-btn:hover {
-            transform: scale(1.15);
-        }
-
-        .icon-btn:active {
-            transform: scale(0.95);
-        }
-
-        .add-btn {
-            border-color: var(--neon-green);
-            color: var(--neon-green);
-        }
-
-        .add-btn:hover {
-            background: rgba(0, 255, 136, 0.2);
-            box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
-        }
-
-        .connect-btn {
-            border-color: var(--neon-yellow);
-            color: var(--neon-yellow);
-        }
-
-        .connect-btn:hover {
-            background: rgba(255, 213, 0, 0.2);
-            box-shadow: 0 0 12px rgba(255, 213, 0, 0.4);
-        }
-
-        .delete-btn {
-            border-color: var(--neon-magenta);
-            color: var(--neon-magenta);
-        }
-
-        .delete-btn:hover {
-            background: rgba(255, 0, 229, 0.2);
-            box-shadow: 0 0 12px rgba(255, 0, 229, 0.4);
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
         }
 
         .node.level-0 {
@@ -442,60 +364,6 @@
             box-shadow: 0 6px 30px rgba(0, 255, 136, 0.4);
         }
 
-        .node.level-4 {
-            border-color: var(--neon-orange);
-            box-shadow: 0 4px 20px rgba(255, 107, 53, 0.25);
-        }
-
-        .node.level-4:hover {
-            box-shadow: 0 6px 30px rgba(255, 107, 53, 0.4);
-        }
-
-        .node.level-5 {
-            border-color: var(--neon-purple);
-            box-shadow: 0 4px 20px rgba(157, 78, 221, 0.25);
-        }
-
-        .node.level-5:hover {
-            box-shadow: 0 6px 30px rgba(157, 78, 221, 0.4);
-        }
-
-        .node.level-6 {
-            border-color: var(--neon-pink);
-            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.25);
-        }
-
-        .node.level-6:hover {
-            box-shadow: 0 6px 30px rgba(255, 0, 110, 0.4);
-        }
-
-        .node.level-7 {
-            border-color: var(--neon-blue);
-            box-shadow: 0 4px 20px rgba(67, 97, 238, 0.25);
-        }
-
-        .node.level-7:hover {
-            box-shadow: 0 6px 30px rgba(67, 97, 238, 0.4);
-        }
-
-        .node.level-8 {
-            border-color: var(--neon-lime);
-            box-shadow: 0 4px 20px rgba(181, 255, 55, 0.25);
-        }
-
-        .node.level-8:hover {
-            box-shadow: 0 6px 30px rgba(181, 255, 55, 0.4);
-        }
-
-        .node.level-9 {
-            border-color: var(--neon-red);
-            box-shadow: 0 4px 20px rgba(255, 23, 68, 0.25);
-        }
-
-        .node.level-9:hover {
-            box-shadow: 0 6px 30px rgba(255, 23, 68, 0.4);
-        }
-
         .connection-line {
             stroke-width: 2;
             fill: none;
@@ -505,41 +373,6 @@
 
         .connection-line:hover {
             opacity: 1;
-        }
-
-        .mode-indicator {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 28px;
-            background: rgba(26, 29, 58, 0.9);
-            border: 1px solid var(--neon-yellow);
-            border-radius: 20px;
-            color: var(--neon-yellow);
-            font-weight: 600;
-            font-size: 0.9rem;
-            z-index: 1000;
-            display: none;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(255, 213, 0, 0.3);
-        }
-
-        .mode-indicator.active {
-            display: block;
-            animation: slide-up 0.2s ease;
-        }
-
-        @keyframes slide-up {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
         }
 
         .status-indicator {
@@ -598,20 +431,6 @@
             background: rgba(0, 240, 255, 0.5);
         }
 
-        .selection-box {
-            position: absolute;
-            border: 2px dashed var(--neon-cyan);
-            background: rgba(0, 240, 255, 0.1);
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-        }
-
-        .node.selected {
-            outline: 3px solid var(--neon-cyan);
-            outline-offset: 2px;
-        }
-
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.3rem;
@@ -619,6 +438,24 @@
 
             .header {
                 padding: 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-left {
+                flex-direction: column;
+                gap: 15px;
+                width: 100%;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
             }
 
             .btn {
@@ -636,38 +473,47 @@
 
 <body>
     <div class="header">
-        <h1>PROJECT COSMOS</h1>
+        <div class="header-left">
+            <h1>PROJECT MINDMAP</h1>
+            <div class="nav-links">
+                <a href="/" class="nav-link">👥 Team Dashboard</a>
+                <a href="/onboarding" class="nav-link">🚀 Onboarding</a>
+            </div>
+        </div>
         <div class="controls">
             <div class="line-style-selector">
                 <button class="line-style-btn active" data-style="curved">Curved</button>
                 <button class="line-style-btn" data-style="straight">Straight</button>
                 <button class="line-style-btn" data-style="step">Step</button>
             </div>
-            <button class="btn" id="organize-btn">✨ Auto Organize</button>
+            <input type="text" id="mindmap-search" placeholder="Search nodes..."
+                style="padding: 8px 16px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--star-white); font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+            <select id="mindmap-status-filter"
+                style="padding: 8px 16px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--star-white); font-size: 0.85rem; font-family: 'Inter', sans-serif;">
+                <option value="all">All Projects</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="archived">Archived</option>
+            </select>
             <button class="btn" id="add-node-btn">+ Add Node</button>
             <button class="btn" id="connect-mode-btn">🔗 Connect</button>
-            <button class="btn danger" id="clear-db-btn">🗑️ Clear All</button>
+            <button class="btn" id="sync-btn">🔄 Sync from Team Data</button>
+            <button class="btn" id="organize-btn">✨ Auto Organize</button>
         </div>
     </div>
 
     <div class="status-indicator">
         <div class="status-dot"></div>
-        <span id="status-text">Connected to Flask</span>
+        <span id="status-text">Connected to Database</span>
     </div>
 
     <div class="canvas" id="canvas">
         <div class="canvas-inner" id="canvas-inner">
             <svg id="connector-svg"></svg>
-            <div class="selection-box" id="selection-box"></div>
         </div>
     </div>
 
-    <div class="mode-indicator" id="mode-indicator">
-        Click a node, then click another to connect
-    </div>
-
     <script>
-        // ==================== API FUNCTIONS ====================
         const API_BASE = '/api';
 
         async function apiCall(endpoint, options = {}) {
@@ -703,10 +549,6 @@
             });
         }
 
-        async function deleteNodeFromDB(nodeId) {
-            return await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
-        }
-
         async function loadConnectionsFromDB() {
             return await apiCall('/connections');
         }
@@ -718,6 +560,10 @@
             });
         }
 
+        async function deleteNodeFromDB(nodeId) {
+            return await apiCall(`/nodes/${nodeId}`, { method: 'DELETE' });
+        }
+
         async function deleteConnectionFromDB(from, to) {
             return await apiCall('/connections/by-nodes', {
                 method: 'DELETE',
@@ -725,8 +571,8 @@
             });
         }
 
-        async function clearAllData() {
-            return await apiCall('/clear-all', { method: 'DELETE' });
+        async function syncFromTeamData() {
+            return await apiCall('/sync-mindmap', { method: 'POST' });
         }
 
         async function initializeDatabase() {
@@ -743,40 +589,25 @@
             }
         }
 
-        // ==================== APP LOGIC ====================
         const canvas = document.getElementById('canvas');
         const canvasInner = document.getElementById('canvas-inner');
         const svg = document.getElementById('connector-svg');
-        const modeIndicator = document.getElementById('mode-indicator');
-        const selectionBox = document.getElementById('selection-box');
 
         let nodes = [];
         let connections = [];
         let draggedNode = null;
         let dragOffset = { x: 0, y: 0 };
+        let lineStyle = 'curved';
         let connectMode = false;
         let firstConnectNode = null;
-        let lineStyle = 'curved';
-
-        // Selection variables
-        let isSelecting = false;
-        let selectionStart = { x: 0, y: 0 };
-        let selectedNodes = new Set();
-        let isDraggingSelection = false;
-        let selectionDragStart = { x: 0, y: 0 };
-        let selectedNodesStartPos = new Map();
+        let searchQuery = '';
+        let statusFilter = 'all';
 
         const lineColors = {
-            0: 'rgba(0, 240, 255, 0.7)',      // cyan
-            1: 'rgba(255, 0, 229, 0.7)',      // magenta
-            2: 'rgba(255, 213, 0, 0.7)',      // yellow
-            3: 'rgba(0, 255, 136, 0.7)',      // green
-            4: 'rgba(255, 107, 53, 0.7)',     // orange
-            5: 'rgba(157, 78, 221, 0.7)',     // purple
-            6: 'rgba(255, 0, 110, 0.7)',      // pink
-            7: 'rgba(67, 97, 238, 0.7)',      // blue
-            8: 'rgba(181, 255, 55, 0.7)',     // lime
-            9: 'rgba(255, 23, 68, 0.7)'       // red
+            0: 'rgba(0, 240, 255, 0.7)',
+            1: 'rgba(255, 0, 229, 0.7)',
+            2: 'rgba(255, 213, 0, 0.7)',
+            3: 'rgba(0, 255, 136, 0.7)',
         };
 
         const createNodeElement = (node) => {
@@ -788,15 +619,21 @@
 
             div.innerHTML = `
                 <span class="node-text" contenteditable="true">${node.text}</span>
-                <div class="node-controls">
-                    <div class="level-selector" title="Change level">L${node.level}</div>
-                    <button class="icon-btn add-btn" title="Add child">+</button>
-                    <button class="icon-btn connect-btn" title="Connect">⚡</button>
-                    <button class="icon-btn delete-btn" title="Delete">×</button>
+                <div class="node-controls" style="display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s;">
+                    <button class="icon-btn connect-btn" title="Connect" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--neon-yellow); background: rgba(10, 14, 39, 0.6); color: var(--neon-yellow); cursor: pointer;">⚡</button>
+                    <button class="icon-btn delete-btn" title="Delete" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--neon-magenta); background: rgba(10, 14, 39, 0.6); color: var(--neon-magenta); cursor: pointer;">×</button>
                 </div>
             `;
 
             const textSpan = div.querySelector('.node-text');
+
+            // Show controls on hover
+            div.addEventListener('mouseenter', () => {
+                div.querySelector('.node-controls').style.opacity = '1';
+            });
+            div.addEventListener('mouseleave', () => {
+                div.querySelector('.node-controls').style.opacity = '0';
+            });
 
             textSpan.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
@@ -813,37 +650,12 @@
                 node.text = textSpan.textContent;
                 await saveNodeToDB(node);
                 updateStatus('Saved!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-                requestAnimationFrame(() => drawConnections());
-            });
-
-            textSpan.addEventListener('input', () => {
+                setTimeout(() => updateStatus('Connected to Database'), 2000);
                 requestAnimationFrame(() => drawConnections());
             });
 
             div.addEventListener('mousedown', (e) => {
-                if (e.target.closest('.icon-btn') || e.target.closest('.level-selector') || e.target === textSpan) {
-                    return;
-                }
-
-                // If this node is in selection, drag all selected nodes
-                if (selectedNodes.has(node.id)) {
-                    isDraggingSelection = true;
-                    const canvasRect = canvasInner.getBoundingClientRect();
-                    selectionDragStart.x = e.clientX - canvasRect.left + canvas.scrollLeft;
-                    selectionDragStart.y = e.clientY - canvasRect.top + canvas.scrollTop;
-
-                    // Store starting positions
-                    selectedNodesStartPos.clear();
-                    selectedNodes.forEach(nodeId => {
-                        const n = nodes.find(nd => nd.id === nodeId);
-                        if (n) {
-                            selectedNodesStartPos.set(nodeId, { x: n.x, y: n.y });
-                        }
-                    });
-
-                    e.preventDefault();
-                    e.stopPropagation();
+                if (e.target.closest('.icon-btn') || e.target === textSpan) {
                     return;
                 }
 
@@ -857,64 +669,14 @@
                 e.preventDefault();
             });
 
-            div.querySelector('.add-btn').addEventListener('click', async (e) => {
-                e.stopPropagation();
-
-                const newNode = await saveNodeToDB({
-                    x: node.x + 350,
-                    y: node.y + (Math.random() - 0.5) * 100,
-                    text: 'New Node',
-                    level: (node.level + 1) % 10
-                });
-
-                nodes.push(newNode);
-
-                const connection = await saveConnectionToDB({
-                    from: node.id,
-                    to: newNode.id
-                });
-                connections.push(connection);
-
-                const elem = createNodeElement(newNode);
-                canvasInner.appendChild(elem);
-                requestAnimationFrame(() => drawConnections());
-                updateStatus('Node added!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-
-                setTimeout(() => {
-                    const newTextSpan = elem.querySelector('.node-text');
-                    newTextSpan.focus();
-                    document.execCommand('selectAll', false, null);
-                }, 100);
-            });
-
-            div.querySelector('.level-selector').addEventListener('click', async (e) => {
-                e.stopPropagation();
-
-                // Cycle through levels 0-9
-                node.level = (node.level + 1) % 10;
-
-                // Update the node's class and level display
-                div.className = `node level-${node.level}`;
-                e.target.textContent = `L${node.level}`;
-
-                // Save to database
-                await saveNodeToDB(node);
-
-                // Redraw connections with new color
-                requestAnimationFrame(() => drawConnections());
-
-                updateStatus('Level changed!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-            });
-
+            // Connect button
             div.querySelector('.connect-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
                 if (!connectMode) {
                     connectMode = true;
                     firstConnectNode = node;
                     div.classList.add('connecting');
-                    modeIndicator.classList.add('active');
+                    document.getElementById('mode-indicator').classList.add('active');
                 } else {
                     if (firstConnectNode && firstConnectNode.id !== node.id) {
                         const exists = connections.some(c =>
@@ -929,32 +691,34 @@
                             connections.push(connection);
                             requestAnimationFrame(() => drawConnections());
                             updateStatus('Connected!');
-                            setTimeout(() => updateStatus('Connected to Flask'), 2000);
+                            setTimeout(() => updateStatus('Connected to Database'), 2000);
                         }
                     }
                     document.querySelector('.connecting')?.classList.remove('connecting');
                     connectMode = false;
                     firstConnectNode = null;
-                    modeIndicator.classList.remove('active');
+                    document.getElementById('mode-indicator').classList.remove('active');
                 }
             });
 
+            // Delete button
             div.querySelector('.delete-btn').addEventListener('click', async (e) => {
                 e.stopPropagation();
+                if (confirm('Delete this node and its connections?')) {
+                    await deleteNodeFromDB(node.id);
+                    nodes = nodes.filter(n => n.id !== node.id);
 
-                await deleteNodeFromDB(node.id);
-                nodes = nodes.filter(n => n.id !== node.id);
+                    const connectionsToDelete = connections.filter(c => c.from === node.id || c.to === node.id);
+                    for (const conn of connectionsToDelete) {
+                        await deleteConnectionFromDB(conn.from, conn.to);
+                    }
+                    connections = connections.filter(c => c.from !== node.id && c.to !== node.id);
 
-                const connectionsToDelete = connections.filter(c => c.from === node.id || c.to === node.id);
-                for (const conn of connectionsToDelete) {
-                    await deleteConnectionFromDB(conn.from, conn.to);
+                    div.remove();
+                    requestAnimationFrame(() => drawConnections());
+                    updateStatus('Deleted!');
+                    setTimeout(() => updateStatus('Connected to Database'), 2000);
                 }
-                connections = connections.filter(c => c.from !== node.id && c.to !== node.id);
-
-                div.remove();
-                requestAnimationFrame(() => drawConnections());
-                updateStatus('Deleted!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
             });
 
             return div;
@@ -1025,7 +789,6 @@
                         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         let d;
 
-                        const distance = Math.sqrt(dx * dx + dy * dy);
                         const isNearlyHorizontal = Math.abs(dy) < 20 && Math.abs(dx) > 50;
                         const isNearlyVertical = Math.abs(dx) < 20 && Math.abs(dy) > 50;
                         const isNearlyStraight = isNearlyHorizontal || isNearlyVertical;
@@ -1060,100 +823,9 @@
             });
         };
 
-        // Canvas mousedown for drag-to-select
-        canvasInner.addEventListener('mousedown', (e) => {
-            // Only start selection if clicking on canvas background (not on a node)
-            if (e.target === canvasInner || e.target === svg) {
-                const canvasRect = canvasInner.getBoundingClientRect();
-                selectionStart.x = e.clientX - canvasRect.left + canvas.scrollLeft;
-                selectionStart.y = e.clientY - canvasRect.top + canvas.scrollTop;
-                isSelecting = true;
-
-                // Clear previous selection if not holding shift
-                if (!e.shiftKey) {
-                    selectedNodes.forEach(nodeId => {
-                        const elem = document.querySelector(`[data-id="${nodeId}"]`);
-                        if (elem) elem.classList.remove('selected');
-                    });
-                    selectedNodes.clear();
-                }
-
-                selectionBox.style.display = 'block';
-                selectionBox.style.left = `${selectionStart.x}px`;
-                selectionBox.style.top = `${selectionStart.y}px`;
-                selectionBox.style.width = '0px';
-                selectionBox.style.height = '0px';
-            }
-        });
-
         let rafId = null;
         document.addEventListener('mousemove', (e) => {
-            if (isSelecting) {
-                const canvasRect = canvasInner.getBoundingClientRect();
-                const currentX = e.clientX - canvasRect.left + canvas.scrollLeft;
-                const currentY = e.clientY - canvasRect.top + canvas.scrollTop;
-
-                const left = Math.min(selectionStart.x, currentX);
-                const top = Math.min(selectionStart.y, currentY);
-                const width = Math.abs(currentX - selectionStart.x);
-                const height = Math.abs(currentY - selectionStart.y);
-
-                selectionBox.style.left = `${left}px`;
-                selectionBox.style.top = `${top}px`;
-                selectionBox.style.width = `${width}px`;
-                selectionBox.style.height = `${height}px`;
-
-                // Check which nodes are in selection
-                nodes.forEach(node => {
-                    const nodeRight = node.x + 200; // approximate node width
-                    const nodeBottom = node.y + 50; // approximate node height
-
-                    const isInSelection = !(
-                        node.x > left + width ||
-                        nodeRight < left ||
-                        node.y > top + height ||
-                        nodeBottom < top
-                    );
-
-                    const elem = document.querySelector(`[data-id="${node.id}"]`);
-                    if (isInSelection) {
-                        selectedNodes.add(node.id);
-                        if (elem) elem.classList.add('selected');
-                    } else if (!e.shiftKey) {
-                        selectedNodes.delete(node.id);
-                        if (elem) elem.classList.remove('selected');
-                    }
-                });
-            } else if (isDraggingSelection && selectedNodes.size > 0) {
-                if (rafId) return;
-
-                rafId = requestAnimationFrame(() => {
-                    const canvasRect = canvasInner.getBoundingClientRect();
-                    const currentX = e.clientX - canvasRect.left + canvas.scrollLeft;
-                    const currentY = e.clientY - canvasRect.top + canvas.scrollTop;
-
-                    const deltaX = currentX - selectionDragStart.x;
-                    const deltaY = currentY - selectionDragStart.y;
-
-                    selectedNodes.forEach(nodeId => {
-                        const node = nodes.find(n => n.id === nodeId);
-                        if (node) {
-                            const startPos = selectedNodesStartPos.get(nodeId);
-                            node.x = startPos.x + deltaX;
-                            node.y = startPos.y + deltaY;
-
-                            const elem = document.querySelector(`[data-id="${nodeId}"]`);
-                            if (elem) {
-                                elem.style.left = `${node.x}px`;
-                                elem.style.top = `${node.y}px`;
-                            }
-                        }
-                    });
-
-                    drawConnections();
-                    rafId = null;
-                });
-            } else if (draggedNode) {
+            if (draggedNode) {
                 if (rafId) return;
 
                 rafId = requestAnimationFrame(() => {
@@ -1175,60 +847,13 @@
         });
 
         document.addEventListener('mouseup', async () => {
-            if (isSelecting) {
-                isSelecting = false;
-                selectionBox.style.display = 'none';
-            } else if (isDraggingSelection) {
-                isDraggingSelection = false;
-
-                // Save all moved nodes
-                for (const nodeId of selectedNodes) {
-                    const node = nodes.find(n => n.id === nodeId);
-                    if (node) {
-                        await saveNodeToDB(node);
-                    }
-                }
-                updateStatus('Positions saved!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-            } else if (draggedNode) {
+            if (draggedNode) {
                 const elem = document.querySelector(`[data-id="${draggedNode.id}"]`);
                 elem.classList.remove('dragging');
                 await saveNodeToDB(draggedNode);
                 updateStatus('Position saved!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
+                setTimeout(() => updateStatus('Connected to Database'), 2000);
                 draggedNode = null;
-            }
-        });
-
-        document.getElementById('add-node-btn').addEventListener('click', async () => {
-            const newNode = await saveNodeToDB({
-                x: 300 + Math.random() * 200,
-                y: 300 + Math.random() * 200,
-                text: 'New Node',
-                level: 0
-            });
-
-            nodes.push(newNode);
-            const elem = createNodeElement(newNode);
-            canvasInner.appendChild(elem);
-            updateStatus('Node created!');
-            setTimeout(() => updateStatus('Connected to Flask'), 2000);
-
-            setTimeout(() => {
-                const textSpan = elem.querySelector('.node-text');
-                textSpan.focus();
-                document.execCommand('selectAll', false, null);
-            }, 100);
-        });
-
-        document.getElementById('connect-mode-btn').addEventListener('click', () => {
-            connectMode = !connectMode;
-            if (connectMode) {
-                modeIndicator.classList.add('active');
-            } else {
-                modeIndicator.classList.remove('active');
-                document.querySelector('.connecting')?.classList.remove('connecting');
-                firstConnectNode = null;
             }
         });
 
@@ -1239,6 +864,18 @@
                 lineStyle = btn.dataset.style;
                 requestAnimationFrame(() => drawConnections());
             });
+        });
+
+        document.getElementById('sync-btn').addEventListener('click', async () => {
+            updateStatus('Syncing from team data...');
+            try {
+                await syncFromTeamData();
+                await initializeApp();
+                updateStatus('Synced successfully!');
+                setTimeout(() => updateStatus('Connected to Database'), 2000);
+            } catch (error) {
+                updateStatus('Sync failed', true);
+            }
         });
 
         document.getElementById('organize-btn').addEventListener('click', async () => {
@@ -1295,47 +932,7 @@
                 await saveNodeToDB(node);
             }
             updateStatus('Layout saved!');
-            setTimeout(() => updateStatus('Connected to Flask'), 2000);
-        });
-
-        document.getElementById('clear-db-btn').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to delete all nodes and connections? This cannot be undone.')) {
-                await clearAllData();
-                nodes = [];
-                connections = [];
-                canvasInner.querySelectorAll('.node').forEach(el => el.remove());
-                drawConnections();
-                updateStatus('Database cleared!');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-
-                // Reinitialize with default data
-                await initializeApp();
-            }
-        });
-
-        // Keyboard shortcuts for selection
-        document.addEventListener('keydown', (e) => {
-            // Ctrl/Cmd + A to select all
-            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-                e.preventDefault();
-                nodes.forEach(node => {
-                    selectedNodes.add(node.id);
-                    const elem = document.querySelector(`[data-id="${node.id}"]`);
-                    if (elem) elem.classList.add('selected');
-                });
-                updateStatus(`${selectedNodes.size} nodes selected`);
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-            }
-            // Escape to deselect all
-            else if (e.key === 'Escape') {
-                selectedNodes.forEach(nodeId => {
-                    const elem = document.querySelector(`[data-id="${nodeId}"]`);
-                    if (elem) elem.classList.remove('selected');
-                });
-                selectedNodes.clear();
-                updateStatus('Selection cleared');
-                setTimeout(() => updateStatus('Connected to Flask'), 2000);
-            }
+            setTimeout(() => updateStatus('Connected to Database'), 2000);
         });
 
         function buildTree(nodeId, visited = new Set()) {
@@ -1405,28 +1002,19 @@
             try {
                 updateStatus('Loading...');
 
-                // Initialize database
                 await initializeDatabase();
 
-                // Load data from Flask backend
                 const loadedNodes = await loadNodesFromDB();
                 const loadedConnections = await loadConnectionsFromDB();
 
                 nodes = loadedNodes;
                 connections = loadedConnections;
 
-                // Clear existing DOM nodes
-                canvasInner.querySelectorAll('.node').forEach(el => el.remove());
-
-                // Create node elements
-                nodes.forEach(node => {
-                    const elem = createNodeElement(node);
-                    canvasInner.appendChild(elem);
-                });
+                renderNodes();
 
                 setTimeout(() => {
                     drawConnections();
-                    updateStatus('Connected to Flask');
+                    updateStatus('Connected to Database');
                 }, 50);
 
             } catch (error) {
@@ -1434,6 +1022,71 @@
                 updateStatus('Connection failed', true);
             }
         }
+
+        function renderNodes() {
+            canvasInner.querySelectorAll('.node').forEach(el => el.remove());
+
+            const filteredNodes = nodes.filter(node => {
+                const matchesSearch = node.text.toLowerCase().includes(searchQuery.toLowerCase());
+                // Filter by project status if node is a project
+                if (statusFilter !== 'all' && node.entityType === 'project') {
+                    // Would need to fetch project status - for now just show all
+                    return matchesSearch;
+                }
+                return matchesSearch;
+            });
+
+            filteredNodes.forEach(node => {
+                const elem = createNodeElement(node);
+                canvasInner.appendChild(elem);
+            });
+        }
+
+        document.getElementById('add-node-btn').addEventListener('click', async () => {
+            const newNode = await saveNodeToDB({
+                x: 300 + Math.random() * 200,
+                y: 300 + Math.random() * 200,
+                text: 'New Node',
+                level: 0,
+                entityType: 'custom',
+                entityId: `custom_${Date.now()}`
+            });
+
+            nodes.push(newNode);
+            const elem = createNodeElement(newNode);
+            canvasInner.appendChild(elem);
+            updateStatus('Node created!');
+            setTimeout(() => updateStatus('Connected to Database'), 2000);
+
+            setTimeout(() => {
+                const textSpan = elem.querySelector('.node-text');
+                textSpan.focus();
+                document.execCommand('selectAll', false, null);
+            }, 100);
+        });
+
+        document.getElementById('connect-mode-btn').addEventListener('click', () => {
+            connectMode = !connectMode;
+            if (connectMode) {
+                document.getElementById('mode-indicator').classList.add('active');
+            } else {
+                document.getElementById('mode-indicator').classList.remove('active');
+                document.querySelector('.connecting')?.classList.remove('connecting');
+                firstConnectNode = null;
+            }
+        });
+
+        document.getElementById('mindmap-search').addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderNodes();
+            setTimeout(() => drawConnections(), 50);
+        });
+
+        document.getElementById('mindmap-status-filter').addEventListener('change', (e) => {
+            statusFilter = e.target.value;
+            renderNodes();
+            setTimeout(() => drawConnections(), 50);
+        });
 
         let resizeTimeout;
         window.addEventListener('resize', () => {
@@ -1443,7 +1096,6 @@
             }, 100);
         });
 
-        // Initialize the app
         initializeApp();
     </script>
 </body>
