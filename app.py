@@ -1,10 +1,33 @@
+import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from flask import Flask, jsonify, render_template, request
+import anthropic
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
+
+load_dotenv()
 
 app = Flask(__name__)
+
+# Initialize Claude (Anthropic) client with fallback to Gemini
+try:
+    anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    USE_CLAUDE = True
+except Exception:
+    anthropic_client = None
+    USE_CLAUDE = False
+
+# Initialize Gemini as fallback
+try:
+    import google.generativeai as genai
+
+    genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+    USE_GEMINI = True
+except Exception:
+    USE_GEMINI = False
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,7 +36,21 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# File upload configuration
+UPLOAD_FOLDER = os.path.join(basedir, "uploads")
+ALLOWED_EXTENSIONS = {"pdf"}
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB max file size
+
+# Create uploads directory if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 db = SQLAlchemy(app)
+
+# Register MCP Blueprint
+from mcp_server.flask_integration import mcp_bp
+
+app.register_blueprint(mcp_bp)
 
 # ==================== DATABASE MODELS ====================
 
@@ -125,6 +162,9 @@ class Task(db.Model):
         db.ForeignKey("team_members.id", ondelete="SET NULL"),
         nullable=True,
     )
+    tech_stack = db.Column(
+        db.Text, nullable=True
+    )  # JSON string of suggested tech stack
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -138,6 +178,7 @@ class Task(db.Model):
             "deadline": self.deadline,
             "projectId": self.project_id,
             "assignedTo": self.assigned_to,
+            "techStack": json.loads(self.tech_stack) if self.tech_stack else None,
         }
 
 
@@ -169,6 +210,54 @@ class ProjectMember(db.Model):
         }
 
 
+class MCPProject(db.Model):
+    """MCP-enhanced project with PDF and analysis"""
+
+    __tablename__ = "mcp_projects"
+
+    id = db.Column(db.String(50), primary_key=True)
+    project_name = db.Column(db.String(200), nullable=False)
+    pdf_filename = db.Column(db.String(500), nullable=True)
+    pdf_text_content = db.Column(db.Text, nullable=True)
+    mcp_analysis = db.Column(db.Text, nullable=True)  # JSON string
+    git_status = db.Column(db.Text, nullable=True)  # JSON string
+    task_breakdown = db.Column(db.Text, nullable=True)  # JSON string
+    time_estimates = db.Column(db.Text, nullable=True)  # JSON string
+    code_summary = db.Column(db.Text, nullable=True)
+    status = db.Column(
+        db.String(50), default="pending"
+    )  # pending, processing, completed, error
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "projectName": self.project_name,
+            "pdfFilename": self.pdf_filename,
+            "pdfTextContent": self.pdf_text_content,
+            "mcpAnalysis": json.loads(self.mcp_analysis) if self.mcp_analysis else None,
+            "gitStatus": json.loads(self.git_status) if self.git_status else None,
+            "taskBreakdown": json.loads(self.task_breakdown)
+            if self.task_breakdown
+            else None,
+            "timeEstimates": json.loads(self.time_estimates)
+            if self.time_estimates
+            else None,
+            "codeSummary": self.code_summary,
+            "status": self.status,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
+            "updatedAt": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+def allowed_file(filename):
+    """Check if file has allowed extension"""
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 # ==================== ROUTES ====================
 
 
@@ -185,6 +274,16 @@ def onboarding():
 @app.route("/mindmap")
 def mindmap():
     return render_template("mindmap.html")
+
+
+@app.route("/mcp-demo")
+def mcp_demo():
+    return render_template("mcp_demo.html")
+
+
+@app.route("/mcp-workflow")
+def mcp_workflow():
+    return render_template("mcp_project_workflow.html")
 
 
 # ==================== API ENDPOINTS ====================
@@ -559,6 +658,128 @@ def assign_task(task_id):
     return jsonify(task.to_dict())
 
 
+# Suggest tech stack for a task using AI
+@app.route("/api/tasks/<string:task_id>/suggest-tech-stack", methods=["POST"])
+def suggest_tech_stack(task_id):
+    """
+    Use Claude AI to suggest appropriate tech stack and tools for a task
+    """
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+
+    # Get project context
+    project = Project.query.get(task.project_id)
+
+    # Get assigned member info if available
+    member_info = ""
+    if task.assigned_to:
+        member = TeamMember.query.get(task.assigned_to)
+        if member:
+            member_info = f"Assigned to: {member.name} ({member.role})"
+
+    prompt = f"""You are a technical architect helping a developer solve their task. 
+    
+Project: {project.name}
+Task: {task.title}
+Priority: {task.priority}
+Deadline: {task.deadline}
+{member_info}
+
+Based on this task, suggest:
+1. **Tech Stack**: Specific technologies, frameworks, and libraries that would be best suited
+2. **Tools**: Development tools, IDEs, or utilities that would help
+3. **Best Practices**: Key architectural patterns or approaches to follow
+4. **Resources**: 2-3 helpful documentation links or tutorials
+
+Keep suggestions practical, modern, and specific to the task. Consider the priority and deadline.
+
+Return a JSON object in this exact format:
+{{
+    "techStack": [
+        {{"name": "Technology Name", "purpose": "Why it's recommended", "category": "frontend/backend/database/etc"}}
+    ],
+    "tools": [
+        {{"name": "Tool Name", "purpose": "What it helps with"}}
+    ],
+    "bestPractices": [
+        "Practice 1",
+        "Practice 2",
+        "Practice 3"
+    ],
+    "resources": [
+        {{"title": "Resource Title", "url": "https://...", "description": "Brief description"}}
+    ]
+}}
+
+IMPORTANT: Return ONLY the JSON object, no additional text or markdown."""
+
+    try:
+        if USE_CLAUDE and anthropic_client:
+            message = anthropic_client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=2048,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            response_text = message.content[0].text.strip()
+            ai_provider = "Claude AI"
+        elif USE_GEMINI:
+            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            response = model.generate_content(contents=prompt)
+            response_text = response.text.strip()
+            ai_provider = "Gemini AI"
+        else:
+            return jsonify({"error": "No AI API available"}), 500
+
+        # Parse response
+        response_text = (
+            response_text.strip()
+            .removeprefix("```json")
+            .removeprefix("```")
+            .removesuffix("```")
+            .strip()
+        )
+
+        tech_stack_data = json.loads(response_text)
+
+        # Save to database
+        task.tech_stack = json.dumps(tech_stack_data)
+        task.updated_at = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify(
+            {
+                "success": True,
+                "taskId": task_id,
+                "generatedBy": ai_provider,
+                "techStack": tech_stack_data,
+            }
+        )
+
+    except Exception as e:
+        print(f"Error generating tech stack: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# Smart Auto-Assign all unassigned tasks in a project using Claude MCP
+@app.route("/api/projects/<string:project_id>/auto-assign", methods=["POST"])
+def auto_assign_project_tasks(project_id):
+    """
+    Intelligently assign all unassigned tasks in a project to team members
+    using Claude AI with MCP integration
+    """
+    project = Project.query.get(project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+
+    result = assign_tasks_intelligently_with_mcp(project_id)
+
+    if "error" in result:
+        return jsonify(result), 400
+
+    return jsonify(result)
+
+
 def sync_mindmap_internal():
     """Internal function to sync mindmap from team data"""
     try:
@@ -771,8 +992,43 @@ def init_db():
                 avatar="EB",
                 avatar_color="3b82f6",
             ),
+            # === ADDED NEW MEMBERS ===
+            TeamMember(
+                id="tm8",
+                name="Kenji Tanaka",
+                role="DevOps Engineer",
+                avatar="KT",
+                avatar_color="22c55e",
+            ),
+            TeamMember(
+                id="tm9",
+                name="Sarah Chen",
+                role="Hardware Engineer",
+                avatar="SC",
+                avatar_color="a855f7",
+            ),
+            TeamMember(
+                id="tm10",
+                name="David Kim",
+                role="QA Engineer",
+                avatar="DK",
+                avatar_color="f43f5e",
+            ),
+            TeamMember(
+                id="tm11",
+                name="Chloé Dubois",
+                role="UX/UI Designer",
+                avatar="CD",
+                avatar_color="14b8a6",
+            ),
+            TeamMember(
+                id="tm12",
+                name="Leon Vance",
+                role="Data Scientist",
+                avatar="LV",
+                avatar_color="64748b",
+            ),
         ]
-
         for member in default_members:
             db.session.add(member)
 
@@ -948,7 +1204,901 @@ def reset_db():
         return jsonify({"error": str(e)}), 500
 
 
+# ==================== MCP PROJECT WORKFLOW ENDPOINTS ====================
+
+
+@app.route("/api/mcp-projects", methods=["GET"])
+def get_mcp_projects():
+    """Get all MCP projects"""
+    projects = MCPProject.query.order_by(MCPProject.created_at.desc()).all()
+    return jsonify([project.to_dict() for project in projects])
+
+
+@app.route("/api/mcp-projects/<string:project_id>", methods=["GET"])
+def get_mcp_project(project_id):
+    """Get a specific MCP project"""
+    project = MCPProject.query.get(project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    return jsonify(project.to_dict())
+
+
+@app.route("/api/mcp-projects/create", methods=["POST"])
+def create_mcp_project():
+    """
+    Create new MCP project with PDF upload and analysis
+
+    Expected form data:
+    - project_name: string
+    - pdf_file: file (optional)
+    """
+    try:
+        # Get project name from form data
+        project_name = request.form.get("project_name")
+        if not project_name:
+            return jsonify({"error": "project_name is required"}), 400
+
+        # Generate unique project ID
+        project_id = f"mcp_{int(datetime.utcnow().timestamp() * 1000)}"
+
+        # Handle PDF file upload
+        pdf_filename = None
+        pdf_text_content = None
+
+        if "pdf_file" in request.files:
+            pdf_file = request.files["pdf_file"]
+            if pdf_file and pdf_file.filename and allowed_file(pdf_file.filename):
+                filename = secure_filename(pdf_file.filename)
+                # Add timestamp to avoid collisions
+                filename = f"{project_id}_{filename}"
+                filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                pdf_file.save(filepath)
+                pdf_filename = filename
+
+                # Analyze document with MCP
+                try:
+                    pdf_text_content = analyze_document_with_mcp(filepath)
+                except Exception as e:
+                    print(f"Error analyzing document: {e}")
+                    pdf_text_content = f"Error analyzing document: {str(e)}"
+
+        # Create project record
+        project = MCPProject(
+            id=project_id,
+            project_name=project_name,
+            pdf_filename=pdf_filename,
+            pdf_text_content=pdf_text_content,
+            status="pending",
+        )
+
+        db.session.add(project)
+        db.session.commit()
+
+        # Return initial project data
+        return jsonify(
+            {
+                "success": True,
+                "project": project.to_dict(),
+                "message": "Project created successfully",
+            }
+        ), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/mcp-projects/<string:project_id>/analyze", methods=["POST"])
+def analyze_mcp_project(project_id):
+    """
+    Analyze MCP project using Claude MCP
+
+    This endpoint:
+    1. Gets git status
+    2. Analyzes code structure
+    3. Breaks down tasks from PDF content
+    4. Estimates time for tasks
+    5. Generates code summary
+    """
+    try:
+        project = MCPProject.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+
+        # Update status to processing
+        project.status = "processing"
+        db.session.commit()
+
+        # Import MCP functions
+        from mcp_server.flask_integration import call_mcp_tool
+
+        analysis_results = {}
+
+        # 1. Get git status
+        try:
+            git_status = call_mcp_tool("git_status", {"repo_path": "."})
+            analysis_results["gitStatus"] = git_status
+            project.git_status = json.dumps(git_status)
+        except Exception as e:
+            analysis_results["gitStatus"] = {"error": str(e)}
+
+        # 2. Analyze document with MCP and decompose tasks
+        if project.pdf_text_content:
+            try:
+                # Parse the document metadata first
+                doc_info = (
+                    json.loads(project.pdf_text_content)
+                    if project.pdf_text_content.startswith("{")
+                    else {}
+                )
+
+                # Extract full content from document if available
+                full_content = doc_info.get("full_content", "")
+                content_preview = doc_info.get("content", "")
+
+                print(f"DEBUG: Full content length: {len(full_content)}")
+                print(f"DEBUG: Content preview (first 500 chars): {full_content[:500]}")
+
+                # Use Claude AI to generate detailed task breakdown from PDF content
+                if full_content:
+                    print("DEBUG: Calling Claude API for task breakdown...")
+                    task_breakdown = generate_task_breakdown_with_claude(
+                        project.project_name, full_content
+                    )
+                    print(f"DEBUG: Claude task breakdown result: {task_breakdown}")
+                else:
+                    # Fallback if no content extracted
+                    task_breakdown = {
+                        "error": "No PDF content available for analysis",
+                        "subtasks": [],
+                        "total_subtasks": 0,
+                    }
+
+                analysis_results["taskBreakdown"] = task_breakdown
+                project.task_breakdown = json.dumps(task_breakdown)
+
+                # Store document info in analysis
+                if doc_info:
+                    analysis_results["documentInfo"] = doc_info
+            except Exception as e:
+                analysis_results["taskBreakdown"] = {"error": str(e)}
+
+        # 3. Estimate time for main task
+        try:
+            time_estimate = call_mcp_tool(
+                "estimate_task_time",
+                {
+                    "task_title": project.project_name,
+                    "task_description": project.pdf_text_content[:500]
+                    if project.pdf_text_content
+                    else "",
+                },
+            )
+            analysis_results["timeEstimate"] = time_estimate
+            project.time_estimates = json.dumps(time_estimate)
+        except Exception as e:
+            analysis_results["timeEstimate"] = {"error": str(e)}
+
+        # 4. Get project statistics
+        try:
+            project_stats = call_mcp_tool("project_statistics", {"directory": "."})
+            analysis_results["projectStats"] = project_stats
+        except Exception as e:
+            analysis_results["projectStats"] = {"error": str(e)}
+
+        # 5. Generate code summary
+        code_summary = generate_code_summary(project, analysis_results)
+        project.code_summary = code_summary
+        analysis_results["codeSummary"] = code_summary
+
+        # 6. Store complete MCP analysis
+        project.mcp_analysis = json.dumps(analysis_results)
+        project.status = "completed"
+        project.updated_at = datetime.utcnow()
+
+        db.session.commit()
+
+        return jsonify(
+            {
+                "success": True,
+                "project": project.to_dict(),
+                "analysis": analysis_results,
+            }
+        )
+
+    except Exception as e:
+        if project:
+            project.status = "error"
+            project.mcp_analysis = json.dumps({"error": str(e)})
+            db.session.commit()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/mcp-projects/<string:project_id>", methods=["DELETE"])
+def delete_mcp_project(project_id):
+    """Delete an MCP project and its associated files"""
+    try:
+        project = MCPProject.query.get(project_id)
+        if not project:
+            return jsonify({"error": "Project not found"}), 404
+
+        # Delete PDF file if exists
+        if project.pdf_filename:
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], project.pdf_filename)
+            if os.path.exists(filepath):
+                os.remove(filepath)
+
+        db.session.delete(project)
+        db.session.commit()
+
+        return jsonify({"success": True, "message": "Project deleted successfully"})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route(
+    "/api/mcp-projects/<string:project_id>/create-dashboard-project", methods=["POST"]
+)
+def create_dashboard_project_from_mcp(project_id):
+    """
+    Create a Team Dashboard project from MCP analysis
+    Uses Claude MCP to help structure Gemini output into actionable tasks
+    """
+    try:
+        # Get MCP project
+        mcp_project = MCPProject.query.get(project_id)
+        if not mcp_project:
+            return jsonify({"error": "MCP Project not found"}), 404
+
+        if not mcp_project.task_breakdown:
+            return jsonify(
+                {
+                    "error": "No task breakdown available. Please analyze the project first."
+                }
+            ), 400
+
+        # Parse task breakdown
+        task_breakdown = json.loads(mcp_project.task_breakdown)
+
+        # Use Claude MCP to refine and structure the data
+        from mcp_server.flask_integration import call_mcp_tool
+
+        # Get project statistics to help with task assignment
+        project_stats = call_mcp_tool("project_statistics", {"directory": "."})
+
+        # Generate a unique project ID
+        project_id_dashboard = f"mcp_{int(datetime.utcnow().timestamp() * 1000)}"
+
+        # Determine project color based on complexity/priority
+        tag_colors = ["blue", "green", "yellow", "purple", "pink", "red"]
+        complexity = task_breakdown.get("timeline", {}).get("total_estimated_days", 0)
+        if complexity > 30:
+            tag_color = "red"  # High complexity
+        elif complexity > 14:
+            tag_color = "yellow"  # Medium complexity
+        else:
+            tag_color = "green"  # Low complexity
+
+        # Create project description from Gemini analysis
+        overview = task_breakdown.get("project_overview", {})
+        objectives = overview.get("objectives", [])
+        description = f"{overview.get('business_value', 'Project created from MCP analysis')}\n\nObjectives:\n"
+        description += "\n".join(f"- {obj}" for obj in objectives[:3])
+
+        # Create the project in Team Dashboard
+        new_project = Project(
+            id=project_id_dashboard,
+            name=mcp_project.project_name,
+            tag_color=tag_color,
+            description=description[:500],  # Limit description length
+        )
+        db.session.add(new_project)
+
+        # Get available team members
+        team_members = TeamMember.query.all()
+
+        if not team_members:
+            return jsonify(
+                {"error": "No team members available. Please add team members first."}
+            ), 400
+
+        # Create tasks from subtasks - leave unassigned for manual assignment
+        subtasks = task_breakdown.get("subtasks", [])
+        created_tasks = []
+
+        for idx, subtask in enumerate(subtasks[:20]):  # Allow up to 20 tasks
+            task_id = f"{project_id_dashboard}_task_{idx + 1}"
+
+            # Map priority
+            priority = subtask.get("priority", "medium").lower()
+            if priority not in ["low", "medium", "high"]:
+                priority = "medium"
+
+            # Calculate deadline based on estimated hours
+            estimated_hours = subtask.get("estimated_hours", 8)
+            estimated_days = max(1, estimated_hours // 8)
+            deadline_date = datetime.utcnow() + timedelta(
+                days=estimated_days + (idx * 2)
+            )
+            deadline = deadline_date.strftime("%b %d")
+
+            # Leave tasks unassigned so they appear in Project Tasks section
+            # Users can drag-and-drop them to team members
+            assigned_to = None
+
+            # Create task
+            task = Task(
+                id=task_id,
+                title=subtask.get("title", f"Task {idx + 1}"),
+                priority=priority,
+                deadline=deadline,
+                project_id=project_id_dashboard,
+                assigned_to=assigned_to,
+            )
+            db.session.add(task)
+            created_tasks.append(task.to_dict())
+
+        # Don't add team members to project yet - let the intelligent assignment do it
+        # Only members who receive tasks will be added to the project
+
+        # Link MCP project to dashboard project
+        mcp_project.status = "deployed"
+        mcp_analysis = (
+            json.loads(mcp_project.mcp_analysis) if mcp_project.mcp_analysis else {}
+        )
+        mcp_analysis["dashboard_project_id"] = project_id_dashboard
+        mcp_project.mcp_analysis = json.dumps(mcp_analysis)
+
+        db.session.commit()
+
+        # Sync mindmap
+        sync_mindmap_internal()
+
+        # Auto-assign tasks intelligently using Claude MCP
+        assignment_result = assign_tasks_intelligently_with_mcp(project_id_dashboard)
+
+        return jsonify(
+            {
+                "success": True,
+                "message": "Dashboard project created successfully",
+                "project": new_project.to_dict(),
+                "tasks_created": len(created_tasks),
+                "tasks": created_tasks,
+                "auto_assignment": assignment_result,
+                "dashboard_url": "/",
+            }
+        )
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating dashboard project: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    """Serve uploaded files"""
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
+
+# ==================== HELPER FUNCTIONS ====================
+
+
+def assign_tasks_intelligently_with_mcp(project_id: str) -> dict:
+    """
+    Use Claude AI with MCP to intelligently assign tasks to team members
+    Forms a team first, then allocates tasks based on importance and deadline
+    """
+    try:
+        # Get all unassigned tasks for the project
+        unassigned_tasks = Task.query.filter_by(
+            project_id=project_id, assigned_to=None
+        ).all()
+
+        if not unassigned_tasks:
+            return {"message": "No unassigned tasks found", "assignments": []}
+
+        # Get ALL available team members (not just project members)
+        all_team_members = TeamMember.query.all()
+
+        if not all_team_members:
+            return {"error": "No team members available in the system"}
+
+        # Calculate current workload for each team member
+        workload_data = []
+        for member in all_team_members:
+            current_tasks = Task.query.filter_by(
+                project_id=project_id, assigned_to=member.id
+            ).all()
+            workload_data.append(
+                {
+                    "id": member.id,
+                    "name": member.name,
+                    "role": member.role,
+                    "current_tasks": len(current_tasks),
+                    "task_titles": [t.title for t in current_tasks],
+                }
+            )
+
+        # Prepare task data for analysis - sort by priority and deadline
+        task_data = []
+        for task in unassigned_tasks:
+            # Calculate priority score (high=3, medium=2, low=1)
+            priority_score = {"high": 3, "medium": 2, "low": 1}.get(
+                task.priority.lower(), 2
+            )
+            task_data.append(
+                {
+                    "id": task.id,
+                    "title": task.title,
+                    "priority": task.priority,
+                    "priority_score": priority_score,
+                    "deadline": task.deadline,
+                }
+            )
+
+        # Sort tasks by priority (high first) and then by deadline
+        task_data.sort(key=lambda x: (-x["priority_score"], x["deadline"]))
+
+        # Create prompt for Claude to form team and assign critical tasks
+        prompt = f"""You are a project manager AI assistant. Analyze the tasks and team members, then:
+1. Form an optimal team for this project (select only members who will receive tasks)
+2. Assign only the most critical and urgent tasks (roughly 50-70% of tasks)
+3. Leave some tasks unassigned for manual assignment by the project manager
+
+AVAILABLE TEAM MEMBERS:
+{json.dumps(workload_data, indent=2)}
+
+UNASSIGNED TASKS (sorted by importance and deadline):
+{json.dumps(task_data, indent=2)}
+
+ASSIGNMENT CRITERIA:
+1. Form a team: Select the minimum number of team members needed to cover all task types
+2. Match task requirements with team member roles:
+   - Frontend tasks → Frontend/Full Stack Developers
+   - Backend/API tasks → Backend/Full Stack Developers  
+   - UI/UX tasks → Designers or Frontend Developers
+   - Testing tasks → QA Engineers or Full Stack Developers
+   - DevOps/Infrastructure → DevOps Engineers or Backend Developers
+   - Hardware tasks → Hardware Engineers
+   - Data tasks → Data Scientists
+3. Prioritize high-priority and urgent deadline tasks first
+4. Balance workload across selected team members
+5. Don't select members unless they will receive at least one task
+
+IMPORTANT RULES:
+- Form a team of 2-5 members based on task requirements
+- Assign ONLY the most critical and urgent tasks (roughly 50-70% of total tasks)
+- Leave some tasks unassigned so the project manager can manually assign them later
+- Higher priority tasks should be assigned first
+- Tasks with earlier deadlines should be prioritized
+- Only include team members who will actually receive tasks
+- Focus on high and medium priority tasks, leave most low priority tasks unassigned
+
+Return a JSON object in this exact format:
+{{
+    "team": [
+        {{
+            "member_id": "member_id_here",
+            "member_name": "name",
+            "role": "role",
+            "selection_reasoning": "Why this member was selected for the team"
+        }}
+    ],
+    "assignments": [
+        {{
+            "task_id": "task_id_here",
+            "member_id": "member_id_here",
+            "reasoning": "Brief explanation of why this assignment makes sense"
+        }}
+    ]
+}}
+
+IMPORTANT: Return ONLY the JSON object, no additional text. Out of {len(task_data)} tasks, assign roughly 50-70% of them, prioritizing high-priority and urgent tasks. Leave the rest unassigned for manual assignment."""
+
+        # Use Claude or Gemini to make intelligent assignments
+        if USE_CLAUDE and anthropic_client:
+            try:
+                message = anthropic_client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=4096,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                response_text = message.content[0].text.strip()
+                ai_provider = "Claude AI"
+            except Exception as claude_error:
+                print(f"Claude API failed: {claude_error}")
+                if USE_GEMINI:
+                    model = genai.GenerativeModel("gemini-2.0-flash-exp")
+                    response = model.generate_content(contents=prompt)
+                    response_text = response.text.strip()
+                    ai_provider = "Gemini AI (fallback)"
+                else:
+                    raise
+        elif USE_GEMINI:
+            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            response = model.generate_content(contents=prompt)
+            response_text = response.text.strip()
+            ai_provider = "Gemini AI"
+        else:
+            return {"error": "No AI API available for task assignment"}
+
+        # Parse response
+        response_text = (
+            response_text.strip()
+            .removeprefix("```json")
+            .removeprefix("```")
+            .removesuffix("```")
+            .strip()
+        )
+
+        result = json.loads(response_text)
+        team = result.get("team", [])
+        assignments = result.get("assignments", [])
+
+        # First, add selected team members to the project
+        project = Project.query.get(project_id)
+        team_members_added = []
+
+        for team_member_info in team:
+            member_id = team_member_info.get("member_id")
+            member = TeamMember.query.get(member_id)
+
+            if member:
+                # Check if already in project
+                existing = ProjectMember.query.filter_by(
+                    project_id=project_id, member_id=member_id
+                ).first()
+
+                if not existing:
+                    project_member = ProjectMember(
+                        project_id=project_id, member_id=member_id
+                    )
+                    db.session.add(project_member)
+                    team_members_added.append(
+                        {
+                            "member_id": member_id,
+                            "member_name": member.name,
+                            "member_role": member.role,
+                            "reasoning": team_member_info.get(
+                                "selection_reasoning", ""
+                            ),
+                        }
+                    )
+
+        # Apply task assignments to database
+        assignments_made = []
+        for assignment in assignments:
+            task_id = assignment.get("task_id")
+            member_id = assignment.get("member_id")
+            reasoning = assignment.get("reasoning", "")
+
+            task = Task.query.get(task_id)
+            member = TeamMember.query.get(member_id)
+
+            if task and member:
+                task.assigned_to = member_id
+                task.updated_at = datetime.utcnow()
+                assignments_made.append(
+                    {
+                        "task_id": task_id,
+                        "task_title": task.title,
+                        "task_priority": task.priority,
+                        "member_id": member_id,
+                        "member_name": member.name,
+                        "member_role": member.role,
+                        "reasoning": reasoning,
+                    }
+                )
+
+        db.session.commit()
+
+        # Trigger mindmap sync after assignments
+        sync_mindmap_internal()
+
+        return {
+            "success": True,
+            "assigned_by": ai_provider,
+            "team_formed": len(team_members_added),
+            "team_members": team_members_added,
+            "assignments_made": len(assignments_made),
+            "assignments": assignments_made,
+            "total_tasks": len(task_data),
+        }
+
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        return {"error": f"Failed to parse AI response: {str(e)}"}
+    except Exception as e:
+        print(f"Task assignment error: {e}")
+        import traceback
+
+        traceback.print_exc()
+        return {"error": str(e)}
+
+
+def generate_task_breakdown_with_claude(project_name: str, pdf_content: str) -> dict:
+    """
+    Use Claude AI to generate short detailed task breakdown and timeline from PDF content
+    Falls back to Gemini if Claude fails
+    """
+    try:
+        prompt = f"""You are a project planning expert. Analyze the following project document and create a comprehensive, short detailed action plan.
+
+PROJECT NAME: {project_name}
+
+DOCUMENT CONTENT:
+{pdf_content}
+
+Please provide a short detailed analysis in JSON format with the following structure:
+
+{{
+    "project_overview": {{
+        "objectives": ["list of main objectives"],
+        "target_audience": "description of target users",
+        "business_value": "description of business value"
+    }},
+    "key_features": [
+        {{
+            "feature": "feature name",
+            "description": "short description",
+            "priority": "high/medium/low"
+        }}
+    ],
+    "technical_requirements": {{
+        "tech_stack": ["list of technologies needed"],
+        "apis_integrations": ["list of required APIs and integrations"],
+        "data_models": ["key database models/schemas"],
+        "security": ["security considerations"]
+    }},
+    "implementation_phases": [
+        {{
+            "phase": "Phase name",
+            "description": "Phase description",
+            "tasks": ["list of tasks in this phase"],
+            "estimated_days": 0
+        }}
+    ],
+    "subtasks": [
+        {{
+            "id": "task-1",
+            "title": "Task title",
+            "description": "short task description",
+            "priority": "high/medium/low",
+            "estimated_hours": 0,
+            "required_role": "Backend Developer/Frontend Developer/Designer/DevOps/QA/Full Stack Developer",
+            "dependencies": ["list of task IDs this depends on"],
+            "deliverables": ["what will be delivered"]
+        }}
+    ],
+    "challenges": [
+        {{
+            "challenge": "Challenge description",
+            "mitigation": "How to address it",
+            "risk_level": "high/medium/low"
+        }}
+    ],
+    "timeline": {{
+        "total_estimated_hours": 0,
+        "total_estimated_days": 0,
+        "recommended_team_size": 0
+    }},
+    "success_criteria": [
+        "Measurable success criterion"
+    ]
+}}
+
+Be specific, and practical. Base your analysis entirely on the document content provided. Include the "required_role" field for each subtask to help with smart task assignment.
+
+IMPORTANT: Return ONLY the JSON object, no additional text or markdown formatting."""
+
+        # Try Claude first
+        if USE_CLAUDE and anthropic_client:
+            try:
+                print("DEBUG: Attempting to use Claude API...")
+                message = anthropic_client.messages.create(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=4096,
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": prompt,
+                        }
+                    ],
+                )
+                response_text = message.content[0].text.strip()
+                ai_provider = "Claude AI"
+                print("DEBUG: Claude API successful!")
+            except Exception as claude_error:
+                print(f"DEBUG: Claude API failed: {claude_error}")
+                raise  # Re-raise to trigger fallback
+        else:
+            raise Exception("Claude not available")
+
+    except Exception as e:
+        # Fallback to Gemini if Claude fails
+        print(f"Claude error: {e}. Falling back to Gemini...")
+        if USE_GEMINI:
+            try:
+                print("DEBUG: Using Gemini API as fallback...")
+                model = genai.GenerativeModel("gemini-2.5-flash")
+                response = model.generate_content(contents=prompt)
+                response_text = response.text.strip()
+                ai_provider = "Gemini AI (fallback)"
+                print("DEBUG: Gemini API successful!")
+            except Exception as gemini_error:
+                print(f"Gemini API also failed: {gemini_error}")
+                return {
+                    "error": f"Both Claude and Gemini failed. Claude: {str(e)}, Gemini: {str(gemini_error)}",
+                    "subtasks": [],
+                    "total_subtasks": 0,
+                }
+        else:
+            return {
+                "error": f"Claude failed and Gemini not available: {str(e)}",
+                "subtasks": [],
+                "total_subtasks": 0,
+            }
+
+    try:
+        # Remove markdown code blocks if present
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]
+        if response_text.startswith("```"):
+            response_text = response_text[3:]
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]
+        response_text = response_text.strip()
+
+        task_data = json.loads(response_text)
+
+        # Ensure subtasks key exists and calculate total
+        if "subtasks" not in task_data:
+            task_data["subtasks"] = []
+
+        task_data["total_subtasks"] = len(task_data["subtasks"])
+        task_data["original_task"] = project_name
+        task_data["generated_by"] = ai_provider
+
+        return task_data
+
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        print(
+            f"Response text: {response_text if 'response_text' in locals() else 'No response'}"
+        )
+        return {
+            "error": "Failed to parse AI response",
+            "subtasks": [],
+            "total_subtasks": 0,
+        }
+    except Exception as e:
+        print(f"AI API error: {e}")
+        return {
+            "error": str(e),
+            "subtasks": [],
+            "total_subtasks": 0,
+        }
+
+
+def analyze_document_with_mcp(filepath):
+    """Analyze document using Claude MCP instead of direct PDF extraction"""
+    try:
+        # Extract basic file metadata
+        filename = os.path.basename(filepath)
+        file_size = os.path.getsize(filepath)
+
+        # Try to extract PDF text for MCP to analyze
+        try:
+            import PyPDF2
+
+            with open(filepath, "rb") as file:
+                pdf_reader = PyPDF2.PdfReader(file)
+                text_content = ""
+                num_pages = len(pdf_reader.pages)
+
+                # Extract text from all pages
+                for page_num in range(num_pages):
+                    page = pdf_reader.pages[page_num]
+                    text_content += page.extract_text() + "\n\n"
+
+                # Return structured data with actual content for MCP to analyze
+                result = {
+                    "filename": filename,
+                    "filepath": filepath,
+                    "file_size": file_size,
+                    "num_pages": num_pages,
+                    "file_type": "PDF Document",
+                    "content": text_content.strip()[:5000],  # First 5000 chars
+                    "full_content": text_content.strip(),  # Full content for MCP
+                    "analysis_method": "Claude MCP",
+                    "status": "ready_for_analysis",
+                }
+                return json.dumps(result, indent=2)
+
+        except ImportError:
+            # Fallback if PyPDF2 not available
+            result = {
+                "filename": filename,
+                "filepath": filepath,
+                "file_size": file_size,
+                "file_type": "PDF Document",
+                "analysis_method": "Claude MCP",
+                "message": "PDF text extraction requires PyPDF2. Install with: pip install PyPDF2",
+                "status": "metadata_only",
+            }
+            return json.dumps(result, indent=2)
+
+    except Exception as e:
+        return json.dumps(
+            {"error": f"Error analyzing document: {str(e)}", "status": "error"}
+        )
+
+
+def generate_code_summary(project, analysis_results):
+    """Generate a summary of code working and changes"""
+    summary = f"# Code Summary for {project.project_name}\n\n"
+
+    # Git status summary
+    git_status = analysis_results.get("gitStatus", {})
+    if "branch" in git_status:
+        summary += f"## Current Repository Status\n"
+        summary += f"- Branch: {git_status.get('branch', 'unknown')}\n"
+        summary += f"- Changed files: {git_status.get('total_changes', 0)}\n\n"
+
+        if git_status.get("files"):
+            summary += "### Modified Files:\n"
+            for file_info in git_status.get("files", [])[:10]:
+                summary += (
+                    f"- {file_info.get('status', '??')} {file_info.get('file', '')}\n"
+                )
+            summary += "\n"
+
+    # Project statistics
+    proj_stats = analysis_results.get("projectStats", {})
+    if "total_files" in proj_stats:
+        summary += f"## Project Statistics\n"
+        summary += f"- Total files: {proj_stats.get('total_files', 0)}\n"
+        summary += f"- Total lines: {proj_stats.get('total_lines', 0)}\n"
+        summary += (
+            f"- Programming languages: {', '.join(proj_stats.get('languages', []))}\n\n"
+        )
+
+    # Task breakdown
+    task_breakdown = analysis_results.get("taskBreakdown", {})
+    if "subtasks" in task_breakdown:
+        summary += f"## Task Breakdown\n"
+        summary += f"Total subtasks: {task_breakdown.get('total_subtasks', 0)}\n\n"
+        for task in task_breakdown.get("subtasks", [])[:5]:
+            summary += f"### {task.get('title', 'Untitled')}\n"
+            summary += f"- Priority: {task.get('priority', 'medium')}\n"
+            summary += f"- Estimated hours: {task.get('estimated_hours', 0)}\n\n"
+
+    # Time estimate
+    time_est = analysis_results.get("timeEstimate", {})
+    if "estimated_hours" in time_est:
+        summary += f"## Time Estimate\n"
+        summary += f"- Estimated hours: {time_est.get('estimated_hours', 0)}\n"
+        summary += f"- Estimated days: {time_est.get('estimated_days', 0)}\n"
+        summary += f"- Complexity: {time_est.get('complexity', 'medium')}\n"
+        summary += f"- Confidence: {time_est.get('confidence', 'medium')}\n\n"
+
+    summary += f"## Changes Summary\n"
+    summary += "This analysis was performed using Claude MCP integration to provide:\n"
+    summary += "1. Detailed task breakdown from project requirements\n"
+    summary += "2. Time estimates for implementation\n"
+    summary += "3. Current git repository status\n"
+    summary += "4. Project code statistics and structure\n"
+
+    return summary
+
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, port=8000)

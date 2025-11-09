@@ -10,19 +10,22 @@
         rel="stylesheet">
     <style>
         :root {
-            --cosmic-dark: #0a0e27;
-            --cosmic-deep: #1a1d3a;
-            --neon-cyan: #00f0ff;
-            --neon-magenta: #ff00e5;
-            --neon-yellow: #ffd500;
-            --neon-green: #00ff88;
-            --neon-orange: #ff6b35;
-            --neon-purple: #9d4edd;
-            --neon-pink: #ff006e;
-            --neon-blue: #4361ee;
-            --neon-lime: #b5ff37;
-            --neon-red: #ff1744;
-            --star-white: #ffffff;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-400: #94a3b8;
+            --slate-300: #cbd5e1;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --emerald-400: #34d399;
+            --emerald-300: #6ee7b7;
+            --amber-500: #f59e0b;
+            --rose-500: #f43f5e;
+            --blue-500: #3b82f6;
         }
 
         * {
@@ -33,11 +36,11 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 100%);
+            background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
             overflow: hidden;
             position: relative;
             height: 100vh;
-            color: var(--star-white);
+            color: var(--slate-100);
         }
 
         body::before {
@@ -48,9 +51,8 @@
             top: 0;
             left: 0;
             background-image:
-                radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 0, 229, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(255, 213, 0, 0.02) 0%, transparent 50%);
+                radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(52, 211, 153, 0.03) 0%, transparent 50%);
             animation: subtle-glow 10s ease-in-out infinite;
             z-index: -1;
         }
@@ -72,32 +74,33 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 24px 40px;
-            background: rgba(10, 14, 39, 0.7);
+            padding: 20px 40px;
+            background: rgba(30, 41, 59, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.15);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .header-left {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 24px;
         }
 
         h1 {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+            background: linear-gradient(135deg, var(--emerald-400), var(--emerald-500));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-transform: uppercase;
-            letter-spacing: 0.15rem;
+            letter-spacing: 0.1rem;
         }
 
         .nav-links {
@@ -106,72 +109,73 @@
         }
 
         .nav-link {
-            padding: 8px 16px;
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
-            color: var(--neon-cyan);
+            padding: 6px 14px;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 6px;
+            color: var(--slate-300);
             text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.8rem;
+            font-weight: 500;
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
         }
 
         .nav-link:hover {
-            background: rgba(0, 240, 255, 0.2);
-            border-color: var(--neon-cyan);
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--emerald-500);
+            color: var(--emerald-400);
             transform: translateY(-1px);
         }
 
         .controls {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
         }
 
         .line-style-selector {
             display: flex;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
+            gap: 6px;
+            padding: 4px 8px;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--slate-600);
+            border-radius: 6px;
             backdrop-filter: blur(10px);
         }
 
         .line-style-btn {
-            padding: 6px 14px;
+            padding: 4px 10px;
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85rem;
-            font-weight: 600;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: var(--slate-400);
+            font-size: 0.75rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
         }
 
         .line-style-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--star-white);
+            background: rgba(51, 65, 85, 0.8);
+            color: var(--slate-100);
         }
 
         .line-style-btn.active {
-            background: rgba(0, 240, 255, 0.2);
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--emerald-500);
+            color: var(--emerald-400);
         }
 
         .btn {
-            padding: 10px 20px;
-            background: rgba(0, 240, 255, 0.1);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            border-radius: 8px;
-            color: var(--neon-cyan);
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 6px 14px;
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid var(--slate-600);
+            border-radius: 6px;
+            color: var(--slate-200);
+            font-size: 0.8rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: 'Inter', sans-serif;
@@ -179,8 +183,9 @@
         }
 
         .btn:hover {
-            background: rgba(0, 240, 255, 0.2);
-            border-color: var(--neon-cyan);
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--emerald-500);
+            color: var(--emerald-400);
             transform: translateY(-1px);
         }
 
@@ -188,9 +193,20 @@
             transform: translateY(0);
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, var(--emerald-600), var(--emerald-500));
+            border: 1px solid var(--emerald-400);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--emerald-500), var(--emerald-400));
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
         .canvas {
             position: fixed;
-            top: 80px;
+            top: 68px;
             left: 0;
             right: 0;
             bottom: 0;
@@ -222,10 +238,10 @@
             justify-content: center;
             gap: 12px;
             padding: 14px 24px;
-            background: rgba(26, 29, 58, 0.8);
+            background: rgba(30, 41, 59, 0.8);
             border: 2px solid;
             border-radius: 12px;
-            color: var(--star-white);
+            color: var(--slate-100);
             font-size: 1rem;
             font-weight: 600;
             cursor: grab;
@@ -299,16 +315,16 @@
             left: 50%;
             transform: translateX(-50%);
             padding: 12px 28px;
-            background: rgba(26, 29, 58, 0.9);
-            border: 1px solid var(--neon-yellow);
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid var(--emerald-400);
             border-radius: 20px;
-            color: var(--neon-yellow);
+            color: var(--emerald-400);
             font-weight: 600;
             font-size: 0.9rem;
             z-index: 1000;
             display: none;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(255, 213, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
         }
 
         .mode-indicator.active {
@@ -329,39 +345,39 @@
         }
 
         .node.level-0 {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 4px 20px rgba(0, 240, 255, 0.25);
+            border-color: var(--emerald-400);
+            box-shadow: 0 4px 20px rgba(52, 211, 153, 0.25);
         }
 
         .node.level-0:hover {
-            box-shadow: 0 6px 30px rgba(0, 240, 255, 0.4);
+            box-shadow: 0 6px 30px rgba(52, 211, 153, 0.4);
         }
 
         .node.level-1 {
-            border-color: var(--neon-magenta);
-            box-shadow: 0 4px 20px rgba(255, 0, 229, 0.25);
+            border-color: var(--emerald-500);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
         }
 
         .node.level-1:hover {
-            box-shadow: 0 6px 30px rgba(255, 0, 229, 0.4);
+            box-shadow: 0 6px 30px rgba(16, 185, 129, 0.4);
         }
 
         .node.level-2 {
-            border-color: var(--neon-yellow);
-            box-shadow: 0 4px 20px rgba(255, 213, 0, 0.25);
+            border-color: var(--emerald-600);
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.25);
         }
 
         .node.level-2:hover {
-            box-shadow: 0 6px 30px rgba(255, 213, 0, 0.4);
+            box-shadow: 0 6px 30px rgba(5, 150, 105, 0.4);
         }
 
         .node.level-3 {
-            border-color: var(--neon-green);
-            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.25);
+            border-color: var(--slate-400);
+            box-shadow: 0 4px 20px rgba(148, 163, 184, 0.25);
         }
 
         .node.level-3:hover {
-            box-shadow: 0 6px 30px rgba(0, 255, 136, 0.4);
+            box-shadow: 0 6px 30px rgba(148, 163, 184, 0.4);
         }
 
         .connection-line {
@@ -380,10 +396,10 @@
             top: 90px;
             right: 40px;
             padding: 8px 16px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid rgba(0, 255, 136, 0.3);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 8px;
-            color: var(--neon-green);
+            color: var(--emerald-400);
             font-size: 0.85rem;
             font-weight: 600;
             z-index: 1000;
@@ -397,7 +413,7 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--neon-green);
+            background: var(--emerald-400);
             animation: blink 2s ease-in-out infinite;
         }
 
@@ -419,16 +435,16 @@
         }
 
         .canvas::-webkit-scrollbar-track {
-            background: rgba(10, 14, 39, 0.5);
+            background: rgba(15, 23, 42, 0.5);
         }
 
         .canvas::-webkit-scrollbar-thumb {
-            background: rgba(0, 240, 255, 0.3);
+            background: rgba(16, 185, 129, 0.3);
             border-radius: 4px;
         }
 
         .canvas::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 240, 255, 0.5);
+            background: rgba(16, 185, 129, 0.5);
         }
 
         @media (max-width: 768px) {
@@ -476,7 +492,7 @@
         <div class="header-left">
             <h1>PROJECT MINDMAP</h1>
             <div class="nav-links">
-                <a href="/" class="nav-link">👥 Team Dashboard</a>
+                <a href="/" class="nav-link">👥 Dashboard</a>
                 <a href="/onboarding" class="nav-link">🚀 Onboarding</a>
             </div>
         </div>
@@ -486,25 +502,19 @@
                 <button class="line-style-btn" data-style="straight">Straight</button>
                 <button class="line-style-btn" data-style="step">Step</button>
             </div>
-            <input type="text" id="mindmap-search" placeholder="Search nodes..."
-                style="padding: 8px 16px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--star-white); font-size: 0.85rem; font-family: 'Inter', sans-serif;">
-            <select id="mindmap-status-filter"
-                style="padding: 8px 16px; background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--star-white); font-size: 0.85rem; font-family: 'Inter', sans-serif;">
-                <option value="all">All Projects</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="completed">Completed</option>
-                <option value="archived">Archived</option>
-            </select>
-            <button class="btn" id="add-node-btn">+ Add Node</button>
+            <button class="btn btn-primary" id="add-node-btn">+ Add Node</button>
             <button class="btn" id="connect-mode-btn">🔗 Connect</button>
-            <button class="btn" id="sync-btn">🔄 Sync from Team Data</button>
-            <button class="btn" id="organize-btn">✨ Auto Organize</button>
+            <button class="btn" id="organize-btn">✨ Organize</button>
         </div>
     </div>
 
     <div class="status-indicator">
         <div class="status-dot"></div>
         <span id="status-text">Connected to Database</span>
+    </div>
+
+    <div class="mode-indicator" id="mode-indicator">
+        🔗 Connection Mode - Click two nodes to connect
     </div>
 
     <div class="canvas" id="canvas">
@@ -543,6 +553,7 @@
         }
 
         async function saveNodeToDB(node) {
+            console.log('Saving node:', node); // Debug log
             return await apiCall('/nodes', {
                 method: 'POST',
                 body: JSON.stringify(node)
@@ -583,9 +594,9 @@
             const statusText = document.getElementById('status-text');
             statusText.textContent = text;
             if (isError) {
-                statusText.style.color = 'var(--neon-magenta)';
+                statusText.style.color = 'var(--slate-400)';
             } else {
-                statusText.style.color = 'var(--neon-green)';
+                statusText.style.color = 'var(--emerald-400)';
             }
         }
 
@@ -600,14 +611,12 @@
         let lineStyle = 'curved';
         let connectMode = false;
         let firstConnectNode = null;
-        let searchQuery = '';
-        let statusFilter = 'all';
 
         const lineColors = {
-            0: 'rgba(0, 240, 255, 0.7)',
-            1: 'rgba(255, 0, 229, 0.7)',
-            2: 'rgba(255, 213, 0, 0.7)',
-            3: 'rgba(0, 255, 136, 0.7)',
+            0: 'rgba(52, 211, 153, 0.7)',
+            1: 'rgba(16, 185, 129, 0.7)',
+            2: 'rgba(5, 150, 105, 0.7)',
+            3: 'rgba(148, 163, 184, 0.7)',
         };
 
         const createNodeElement = (node) => {
@@ -620,8 +629,8 @@
             div.innerHTML = `
                 <span class="node-text" contenteditable="true">${node.text}</span>
                 <div class="node-controls" style="display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s;">
-                    <button class="icon-btn connect-btn" title="Connect" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--neon-yellow); background: rgba(10, 14, 39, 0.6); color: var(--neon-yellow); cursor: pointer;">⚡</button>
-                    <button class="icon-btn delete-btn" title="Delete" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--neon-magenta); background: rgba(10, 14, 39, 0.6); color: var(--neon-magenta); cursor: pointer;">×</button>
+                    <button class="icon-btn connect-btn" title="Connect" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--emerald-400); background: rgba(30, 41, 59, 0.6); color: var(--emerald-400); cursor: pointer;">⚡</button>
+                    <button class="icon-btn delete-btn" title="Delete" style="width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--slate-400); background: rgba(30, 41, 59, 0.6); color: var(--slate-400); cursor: pointer;">×</button>
                 </div>
             `;
 
@@ -866,18 +875,6 @@
             });
         });
 
-        document.getElementById('sync-btn').addEventListener('click', async () => {
-            updateStatus('Syncing from team data...');
-            try {
-                await syncFromTeamData();
-                await initializeApp();
-                updateStatus('Synced successfully!');
-                setTimeout(() => updateStatus('Connected to Database'), 2000);
-            } catch (error) {
-                updateStatus('Sync failed', true);
-            }
-        });
-
         document.getElementById('organize-btn').addEventListener('click', async () => {
             const rootNodes = nodes.filter(node =>
                 !connections.some(conn => conn.to === node.id)
@@ -1026,17 +1023,7 @@
         function renderNodes() {
             canvasInner.querySelectorAll('.node').forEach(el => el.remove());
 
-            const filteredNodes = nodes.filter(node => {
-                const matchesSearch = node.text.toLowerCase().includes(searchQuery.toLowerCase());
-                // Filter by project status if node is a project
-                if (statusFilter !== 'all' && node.entityType === 'project') {
-                    // Would need to fetch project status - for now just show all
-                    return matchesSearch;
-                }
-                return matchesSearch;
-            });
-
-            filteredNodes.forEach(node => {
+            nodes.forEach(node => {
                 const elem = createNodeElement(node);
                 canvasInner.appendChild(elem);
             });
@@ -1074,18 +1061,6 @@
                 document.querySelector('.connecting')?.classList.remove('connecting');
                 firstConnectNode = null;
             }
-        });
-
-        document.getElementById('mindmap-search').addEventListener('input', (e) => {
-            searchQuery = e.target.value;
-            renderNodes();
-            setTimeout(() => drawConnections(), 50);
-        });
-
-        document.getElementById('mindmap-status-filter').addEventListener('change', (e) => {
-            statusFilter = e.target.value;
-            renderNodes();
-            setTimeout(() => drawConnections(), 50);
         });
 
         let resizeTimeout;

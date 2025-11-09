@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -12,27 +12,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-600: #475569;
+            --slate-500: #64748b;
+            --slate-400: #94a3b8;
+            --slate-300: #cbd5e1;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --slate-50: #f8fafc;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --emerald-400: #34d399;
+            --emerald-300: #6ee7b7;
+        }
+
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #94a3b8;
+            background: var(--slate-600);
             border-radius: 10px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: var(--slate-500);
         }
 
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: var(--slate-800);
             border-radius: 10px;
         }
 
         body {
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
         }
 
         .task-card-dragging {
@@ -75,7 +93,7 @@
         }
 
         .toast.success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, var(--emerald-500) 0%, var(--emerald-600) 100%);
             color: white;
         }
 
@@ -90,7 +108,7 @@
         }
 
         .toast.info {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, var(--emerald-400) 0%, var(--emerald-500) 100%);
             color: white;
         }
 
@@ -214,27 +232,27 @@
     </style>
 </head>
 
-<body class="h-full font-sans text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+<body class="h-full font-sans text-slate-100">
+    <div class="flex h-screen overflow-hidden bg-slate-900">
 
         <!-- Mobile Sidebar -->
         <div id="mobile-sidebar" class="hidden md:hidden" role="dialog" aria-modal="true">
             <div class="fixed inset-0 flex z-40">
                 <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-gray-600 bg-opacity-75" aria-hidden="true">
                 </div>
-                <div class="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+                <div class="relative flex-1 flex flex-col max-w-xs w-full bg-slate-800 border-r border-slate-700">
                     <div class="absolute top-0 right-0 -mr-12 pt-2">
                         <button type="button" id="mobile-menu-close"
-                            class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                            class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-400">
                             <span class="sr-only">Close sidebar</span>
                             <i data-lucide="x" class="h-6 w-6 text-white"></i>
                         </button>
                     </div>
-                    <div class="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
+                    <div class="flex items-center h-16 flex-shrink-0 px-4 bg-slate-900 border-b border-slate-700">
                         <span class="text-2xl font-bold text-white tracking-wider">Altura</span><span
-                            class="text-2xl font-semibold text-blue-400">Soft</span>
+                            class="text-2xl font-semibold text-emerald-400">Soft</span>
                     </div>
-                    <div class="flex-1 h-0 overflow-y-auto">
+                    <div class="flex-1 h-0 overflow-y-auto bg-slate-800">
                         <nav id="mobile-project-menu" class="flex-1 px-2 py-4">
                         </nav>
                     </div>
@@ -245,10 +263,10 @@
 
         <!-- Desktop Sidebar -->
         <aside class="hidden md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-64">
-                <div class="flex items-center h-16 flex-shrink-0 px-4 bg-gray-900">
+            <div class="flex flex-col w-64 bg-slate-800 border-r border-slate-700">
+                <div class="flex items-center h-16 flex-shrink-0 px-4 bg-slate-900 border-b border-slate-700">
                     <span class="text-2xl font-bold text-white tracking-wider">Altura</span><span
-                        class="text-2xl font-semibold text-blue-400">Soft</span>
+                        class="text-2xl font-semibold text-emerald-400">Soft</span>
                 </div>
                 <div class="flex-1 flex flex-col overflow-y-auto bg-gray-800">
                     <nav id="desktop-project-menu" class="flex-1 px-2 py-4">
@@ -258,36 +276,25 @@
         </aside>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col flex-1 w-0 overflow-hidden">
+        <div class="flex flex-col flex-1 w-0 overflow-hidden bg-slate-900">
             <!-- Header -->
-            <header class="relative flex-shrink-0 flex h-16 bg-white shadow-sm border-b border-slate-200">
+            <header class="relative flex-shrink-0 flex h-16 bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
                 <button type="button" id="mobile-menu-button"
-                    class="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 md:hidden">
+                    class="px-4 border-r border-slate-700 text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500 md:hidden">
                     <span class="sr-only">Open sidebar</span>
                     <i data-lucide="menu" class="h-6 w-6"></i>
                 </button>
                 <div class="flex-1 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div class="flex-1">
-                        <h1 id="main-dashboard-title" class="text-xl font-semibold text-gray-900">Core Platform Team
+                        <h1 id="main-dashboard-title" class="text-xl font-semibold text-slate-100">Core Platform Team
                         </h1>
-                        <p id="today-date" class="text-sm text-gray-500">Loading date...</p>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <button type="button" class="p-1 text-gray-400 hover:text-gray-500 rounded-full bg-white">
-                            <span class="sr-only">View notifications</span>
-                            <i data-lucide="bell" class="h-6 w-6"></i>
-                        </button>
-                        <div class="flex items-center">
-                            <span class="text-sm font-medium text-gray-700 hidden sm:block">Nina Patel</span>
-                            <img class="ml-3 h-8 w-8 rounded-full bg-gray-200"
-                                src="https://placehold.co/100x100/60a5fa/ffffff?text=NP" alt="Nina Patel">
-                        </div>
+                        <p id="today-date" class="text-sm text-slate-400">Loading date...</p>
                     </div>
                 </div>
             </header>
 
             <!-- Main Dashboard Content -->
-            <main class="flex-1 relative overflow-y-auto focus:outline-none">
+            <main class="flex-1 relative overflow-y-auto focus:outline-none bg-slate-900">
                 <div class="py-6">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -298,7 +305,7 @@
                         <!-- Persistent Create Project Button -->
                         <div class="mb-8">
                             <button id="create-project-button"
-                                class="w-full inline-flex items-center justify-center px-6 py-4 border-2 border-dashed border-blue-300 text-base font-medium rounded-lg text-blue-600 bg-blue-50 hover:bg-blue-100 hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                                class="w-full inline-flex items-center justify-center px-6 py-4 border-2 border-dashed border-emerald-500/30 text-base font-medium rounded-lg text-emerald-400 bg-slate-800/50 hover:bg-slate-800 hover:border-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all">
                                 <i data-lucide="folder-plus" class="h-6 w-6 mr-2"></i>
                                 Create New Project
                             </button>
@@ -306,27 +313,29 @@
 
                         <!-- Master Member Directory -->
                         <div class="mb-8">
-                            <div class="bg-white shadow-sm rounded-lg border border-slate-200 overflow-hidden">
-                                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                            <div
+                                class="bg-slate-800/50 backdrop-blur-sm shadow-lg rounded-lg border border-slate-700 overflow-hidden">
+                                <div class="px-5 py-3.5 border-b border-slate-700 bg-slate-800/70">
                                     <div class="flex items-center justify-between">
-                                        <h2 class="text-lg font-semibold text-gray-900">Master Member Directory</h2>
                                         <div class="flex items-center space-x-3">
-                                            <span class="text-sm text-gray-500" id="member-count-badge">0 members</span>
-                                            <button id="add-member-button"
-                                                class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                                <i data-lucide="plus" class="h-4 w-4 mr-1"></i>
-                                                Add Member
-                                            </button>
+                                            <h2 class="text-lg font-semibold text-slate-100">Master Directory</h2>
+                                            <span
+                                                class="text-xs px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full font-medium border border-emerald-500/30"
+                                                id="member-count-badge">0 members</span>
                                         </div>
+                                        <button id="add-member-button"
+                                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all shadow-sm hover:shadow">
+                                            <i data-lucide="user-plus" class="h-4 w-4 mr-1.5"></i>
+                                            New Member
+                                        </button>
                                     </div>
                                     <div class="mt-3">
-                                        <input type="text" id="member-search-input"
-                                            placeholder="Search members by name or role..."
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                        <input type="text" id="member-search-input" placeholder="Search members..."
+                                            class="w-full px-3.5 py-2 bg-slate-700/50 border border-slate-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm transition-all text-slate-100 placeholder-slate-400">
                                     </div>
                                 </div>
-                                <div class="px-6 py-4 max-h-96 overflow-y-auto">
-                                    <div id="member-directory-list" class="space-y-3">
+                                <div class="px-5 py-3 max-h-80 overflow-y-auto bg-slate-800/30">
+                                    <div id="member-directory-list" class="space-y-2">
                                         <!-- Members will be rendered here -->
                                     </div>
                                 </div>
@@ -336,28 +345,28 @@
                         <!-- Team Layout -->
                         <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                            <!-- Project Backlog -->
+                            <!-- Project Tasks -->
                             <div class="lg:col-span-1">
                                 <div class="flex items-center justify-between">
-                                    <h2 class="text-lg leading-6 font-medium text-gray-900">
-                                        Project Backlog
+                                    <h2 class="text-lg leading-6 font-medium text-slate-100">
+                                        Project Tasks
                                     </h2>
                                     <div class="flex items-center space-x-2">
                                         <button id="manage-team-button"
-                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            class="inline-flex items-center px-3 py-1.5 border border-slate-600 text-xs font-medium rounded-md shadow-sm text-slate-300 bg-slate-700/50 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                                             <i data-lucide="users-cog" class="h-4 w-4 mr-1"></i>
                                             Manage Team
                                         </button>
                                         <button id="add-task-button"
-                                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                                             <i data-lucide="plus" class="h-4 w-4 mr-1"></i>
                                             Add Task
                                         </button>
                                     </div>
                                 </div>
                                 <div id="project-backlog-dropzone"
-                                    class="mt-4 p-4 bg-white rounded-lg shadow-sm border border-slate-200 min-h-[400px]">
-                                    <h3 id="project-backlog-title" class="text-sm font-semibold text-gray-700">
+                                    class="mt-4 p-4 bg-slate-800/50 backdrop-blur-sm rounded-lg shadow-lg border border-slate-700 min-h-[400px]">
+                                    <h3 id="project-backlog-title" class="text-sm font-semibold text-slate-300">
                                         Loading...</h3>
                                     <ul id="project-backlog-list" class="mt-3 space-y-3">
                                     </ul>
@@ -366,9 +375,16 @@
 
                             <!-- Team Status -->
                             <div class="lg:col-span-2">
-                                <h2 class="text-lg leading-6 font-medium text-gray-900">
-                                    Team Status & Current Tasks
-                                </h2>
+                                <div class="flex items-center justify-between">
+                                    <h2 class="text-lg leading-6 font-medium text-slate-100">
+                                        Team Status & Current Tasks
+                                    </h2>
+                                    <button id="add-member-to-project-btn"
+                                        class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors">
+                                        <i data-lucide="user-plus" class="h-4 w-4 mr-1"></i>
+                                        Add Team Member
+                                    </button>
+                                </div>
                                 <ul id="team-cards-container" role="list"
                                     class="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2">
                                 </ul>
@@ -446,7 +462,7 @@
                             <h3 class="text-xl leading-6 font-bold text-gray-900" id="modal-title">
                                 Create New Task
                             </h3>
-                            <p class="text-sm text-gray-600 mt-1">Add a new task to your project backlog</p>
+                            <p class="text-sm text-gray-600 mt-1">Add a new task to your project tasks</p>
                         </div>
                     </div>
                 </div>
@@ -517,6 +533,40 @@
                 </div>
                 <div class="bg-white px-4 pb-4 sm:px-6 sm:pb-6">
                     <form id="project-form" class="space-y-4">
+                        <!-- Toggle between Manual and AI-Assisted -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                            <label class="flex items-center justify-between cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg">
+                                        <i data-lucide="sparkles" class="h-5 w-5 text-white"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-sm font-semibold text-gray-900">AI-Assisted Project
+                                            Creation</span>
+                                        <p class="text-xs text-gray-600">Upload PDF to auto-generate tasks with Gemini
+                                            AI</p>
+                                    </div>
+                                </div>
+                                <input type="checkbox" id="use-ai-toggle" class="sr-only peer">
+                                <div
+                                    class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- PDF Upload Section (shown when AI toggle is on) -->
+                        <div id="ai-upload-section"
+                            class="hidden space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                                <i data-lucide="file-up" class="inline h-4 w-4 mr-1"></i>
+                                Upload Project Document (PDF)
+                            </label>
+                            <input type="file" id="ai-pdf-upload" accept=".pdf"
+                                class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700">
+                            <p class="text-xs text-gray-500">AI will analyze the document and create tasks automatically
+                            </p>
+                        </div>
+
                         <div>
                             <label for="project-name" class="block text-sm font-semibold text-gray-700 mb-1.5">Project
                                 Name <span class="text-red-500">*</span></label>
@@ -524,14 +574,14 @@
                                 class="shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-lg px-4 py-2.5 border transition-all"
                                 placeholder="e.g., Mobile App Redesign">
                         </div>
-                        <div>
+                        <div id="manual-description-section">
                             <label for="project-description"
                                 class="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
                             <textarea id="project-description" name="project-description" rows="3"
                                 class="shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-lg px-4 py-2.5 border transition-all"
                                 placeholder="Brief description of the project..."></textarea>
                         </div>
-                        <div>
+                        <div id="manual-color-section">
                             <label for="project-color" class="block text-sm font-semibold text-gray-700 mb-1.5">Tag
                                 Color</label>
                             <div class="grid grid-cols-5 gap-2">
@@ -636,6 +686,49 @@
                     <button type="button" id="cancel-member-button"
                         class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-all">
                         Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member to Project Modal -->
+    <div id="add-member-to-project-modal" class="hidden fixed z-10 inset-0 overflow-y-auto"
+        aria-labelledby="add-member-to-project-modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity modal-backdrop" aria-hidden="true">
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div
+                class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full modal-content">
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex items-center">
+                        <div
+                            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="user-plus" class="h-6 w-6 text-white"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                            <h3 class="text-xl leading-6 font-bold text-gray-900"
+                                id="add-member-to-project-modal-title">
+                                Add Member to Project
+                            </h3>
+                            <p class="text-sm text-gray-600 mt-1">Select members to add to this project</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white px-4 pb-4 sm:px-6 sm:pb-6">
+                    <div class="mb-4">
+                        <input type="text" id="add-member-search" placeholder="Search available members..."
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm">
+                    </div>
+                    <div id="available-members-list" class="max-h-96 overflow-y-auto space-y-2">
+                        <!-- Available members will be rendered here -->
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-b-xl">
+                    <button type="button" id="close-add-member-modal"
+                        class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:w-auto sm:text-sm transition-all">
+                        Close
                     </button>
                 </div>
             </div>

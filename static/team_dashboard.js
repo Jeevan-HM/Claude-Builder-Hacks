@@ -256,21 +256,21 @@ async function syncMindmap() {
 // Utility Functions
 const getPriorityClasses = (priority) => {
     switch (priority) {
-        case 'high': return 'bg-red-100 text-red-800';
-        case 'medium': return 'bg-yellow-100 text-yellow-800';
-        case 'low': return 'bg-green-100 text-green-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'high': return 'bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        case 'medium': return 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        case 'low': return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        default: return 'bg-slate-700/50 text-slate-300 border border-slate-600/50';
     }
 };
 
 const getProjectTagColor = (color) => {
     switch (color) {
-        case 'yellow': return 'bg-yellow-100 text-yellow-800';
-        case 'green': return 'bg-green-100 text-green-800';
-        case 'blue': return 'bg-blue-100 text-blue-800';
-        case 'red': return 'bg-red-100 text-red-800';
-        case 'purple': return 'bg-purple-100 text-purple-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'yellow': return 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
+        case 'green': return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+        case 'blue': return 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        case 'red': return 'bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        case 'purple': return 'bg-purple-500/20 text-purple-300 border border-purple-500/30';
+        default: return 'bg-slate-700/50 text-slate-300 border border-slate-600/50';
     }
 };
 
@@ -304,11 +304,13 @@ async function renderAll() {
         await renderTeamCards();
         await renderProjectBacklog();
         updateMainHeader();
-        addDragAndDropListeners();
 
         if (typeof lucide !== 'undefined' && lucide.createIcons) {
             lucide.createIcons();
         }
+
+        // Add drag listeners AFTER lucide icons are created
+        addDragAndDropListeners();
     } finally {
         state.loading = false;
     }
@@ -389,7 +391,7 @@ async function renderStatsCards() {
     const project = state.projects[state.currentProjectId];
 
     if (!project) {
-        container.innerHTML = '<p class="col-span-4 text-center text-gray-500">Select a project to view stats</p>';
+        container.innerHTML = '<p class="col-span-4 text-center text-slate-400">Select a project to view stats</p>';
         return;
     }
 
@@ -399,47 +401,47 @@ async function renderStatsCards() {
     const teamMembersOnProject = project.teamMembers ? project.teamMembers.length : 0;
 
     container.innerHTML = `
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-slate-200 cursor-pointer hover:shadow-md transition-shadow">
+        <div class="bg-gradient-to-br from-slate-800/80 to-slate-800/50 backdrop-blur-sm overflow-hidden shadow-lg rounded-xl border border-slate-700/50 cursor-pointer hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0"><div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center"><i data-lucide="users" class="h-6 w-6 text-blue-600"></i></div></div>
+                    <div class="flex-shrink-0"><div class="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20"><i data-lucide="users" class="h-6 w-6 text-white"></i></div></div>
                     <div class="ml-4 w-0 flex-1">
-                        <dt class="text-sm font-medium text-gray-500 truncate">Team Members on Project</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">${teamMembersOnProject}</dd>
+                        <dt class="text-sm font-medium text-slate-400 truncate">Team Members on Project</dt>
+                        <dd class="text-3xl font-bold text-white">${teamMembersOnProject}</dd>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-slate-200 cursor-pointer hover:shadow-md transition-shadow">
+        <div class="bg-gradient-to-br from-slate-800/80 to-slate-800/50 backdrop-blur-sm overflow-hidden shadow-lg rounded-xl border border-slate-700/50 cursor-pointer hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0"><div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center"><i data-lucide="folder-kanban" class="h-6 w-6 text-green-600"></i></div></div>
+                    <div class="flex-shrink-0"><div class="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20"><i data-lucide="folder-kanban" class="h-6 w-6 text-white"></i></div></div>
                     <div class="ml-4 w-0 flex-1">
-                        <dt class="text-sm font-medium text-gray-500 truncate">Total Project Tasks</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">${tasks.length}</dd>
+                        <dt class="text-sm font-medium text-slate-400 truncate">Total Project Tasks</dt>
+                        <dd class="text-3xl font-bold text-white">${tasks.length}</dd>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-slate-200 cursor-pointer hover:shadow-md transition-shadow">
+        <div class="bg-gradient-to-br from-slate-800/80 to-slate-800/50 backdrop-blur-sm overflow-hidden shadow-lg rounded-xl border border-slate-700/50 cursor-pointer hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0"><div class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center"><i data-lucide="check-circle" class="h-6 w-6 text-yellow-600"></i></div></div>
+                    <div class="flex-shrink-0"><div class="h-12 w-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20"><i data-lucide="check-circle" class="h-6 w-6 text-white"></i></div></div>
                     <div class="ml-4 w-0 flex-1">
-                        <dt class="text-sm font-medium text-gray-500 truncate">Tasks In-Progress</dt>
-                        <dd class="text-3xl font-semibold text-gray-900">${tasksInProgress}</dd>
+                        <dt class="text-sm font-medium text-slate-400 truncate">Tasks In-Progress</dt>
+                        <dd class="text-3xl font-bold text-white">${tasksInProgress}</dd>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-slate-200 cursor-pointer hover:shadow-md transition-shadow">
+        <div class="bg-gradient-to-br from-slate-800/80 to-slate-800/50 backdrop-blur-sm overflow-hidden shadow-lg rounded-xl border border-slate-700/50 cursor-pointer hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all">
             <div class="p-5">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0"><div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center"><i data-lucide="list" class="h-6 w-6 text-red-600"></i></div></div>
+                    <div class="flex-shrink-0"><div class="h-12 w-12 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/20"><i data-lucide="list" class="h-6 w-6 text-white"></i></div></div>
                     <div class="ml-4 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Tasks in Backlog</dt>
-                            <dd class="text-3xl font-semibold text-gray-900">${tasksInBacklog}</dd>
+                            <dt class="text-sm font-medium text-slate-400 truncate">Unassigned Tasks</dt>
+                            <dd class="text-3xl font-bold text-white">${tasksInBacklog}</dd>
                         </dl>
                     </div>
                 </div>
@@ -460,7 +462,7 @@ async function renderMemberDirectory() {
             member.role.toLowerCase().includes(query);
     });
 
-    countBadge.textContent = `${filteredMembers.length} member${filteredMembers.length !== 1 ? 's' : ''}`;
+    countBadge.textContent = `${filteredMembers.length} ${filteredMembers.length !== 1 ? 'members' : 'member'}`;
 
     if (filteredMembers.length === 0) {
         container.innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">No members found</p>';
@@ -474,28 +476,28 @@ async function renderMemberDirectory() {
         const isAssigned = project && project.teamMembers && project.teamMembers.includes(member.id);
 
         const card = document.createElement('div');
-        card.className = 'flex items-center justify-between p-3 bg-slate-50 rounded-md hover:bg-slate-100 transition-colors member-card cursor-move';
+        card.className = 'flex items-center justify-between p-3 bg-gradient-to-r from-slate-800/60 to-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl hover:border-emerald-500/50 hover:shadow-lg hover:shadow-emerald-500/10 transition-all member-card cursor-move';
         card.draggable = true;
         card.dataset.memberId = member.id;
         card.title = 'Drag to assign to a project';
 
         card.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <img class="w-10 h-10 rounded-full" 
+            <div class="flex items-center space-x-3 flex-1 min-w-0">
+                <img class="w-10 h-10 rounded-full flex-shrink-0 ring-2 ring-slate-700" 
                      src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
                      alt="${member.name}">
-                <div>
-                    <h4 class="text-sm font-semibold text-gray-900 editable-field" contenteditable="true" data-member-id="${member.id}" data-field="name">${member.name}</h4>
-                    <p class="text-xs text-gray-500 editable-field" contenteditable="true" data-member-id="${member.id}" data-field="role">${member.role}</p>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-semibold text-slate-100 truncate editable-field" contenteditable="true" data-member-id="${member.id}" data-field="name">${member.name}</h4>
+                    <p class="text-xs text-slate-400 truncate editable-field" contenteditable="true" data-member-id="${member.id}" data-field="role">${member.role}</p>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 flex-shrink-0">
                 ${isAssigned ?
-                `<span class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">Assigned</span>` :
-                `<span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">Available</span>`
+                `<span class="text-xs px-2.5 py-1 bg-emerald-500/20 text-emerald-300 rounded-full font-medium border border-emerald-500/30">In Project</span>` :
+                `<span class="text-xs px-2.5 py-1 bg-slate-700/50 text-slate-400 rounded-full font-medium border border-slate-600/50">Available</span>`
             }
-                <button class="delete-member-btn text-red-400 hover:text-red-600" onclick="deleteMemberConfirm(event, '${member.id}')">
-                    <i data-lucide="trash-2" class="h-4 w-4"></i>
+                <button class="delete-member-btn text-rose-400 hover:text-rose-300 p-1.5 hover:bg-rose-500/10 rounded-lg transition-colors" onclick="deleteMemberConfirm(event, '${member.id}')">
+                    <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
                 </button>
             </div>
         `;
@@ -547,39 +549,39 @@ async function renderTeamCards() {
         const assignedTask = project.tasks.find(task => task.assignedTo === member.id);
 
         const card = document.createElement('li');
-        card.className = 'col-span-1 bg-white rounded-lg shadow-sm border border-slate-200 divide-y divide-slate-200 group member-card cursor-move';
+        card.className = 'col-span-1 bg-gradient-to-br from-slate-800/70 to-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg border border-slate-700/50 divide-y divide-slate-700/50 group member-card cursor-move hover:border-emerald-500/50 hover:shadow-emerald-500/10 transition-all';
         card.dataset.teamId = member.id;
         card.draggable = true;
         card.dataset.memberId = member.id;
         card.title = 'Drag to assign to a project';
 
         card.innerHTML = `
-    < div class="w-full flex items-center justify-between p-5 space-x-6" >
+            <div class="w-full flex items-center justify-between p-5 space-x-6">
                 <div class="flex-1 truncate">
                     <div class="flex items-center space-x-3">
-                        <h3 class="text-gray-900 text-sm font-semibold truncate editable-field" contenteditable="true" data-member-id="${member.id}" data-field="name">${member.name}</h3>
-                        <span class="flex-shrink-0 inline-block px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-full editable-field" contenteditable="true" data-member-id="${member.id}" data-field="role">
+                        <h3 class="text-slate-100 text-sm font-bold truncate editable-field" contenteditable="true" data-member-id="${member.id}" data-field="name">${member.name}</h3>
+                        <span class="flex-shrink-0 inline-block px-2.5 py-1 text-xs font-semibold bg-slate-700/50 text-slate-300 rounded-full editable-field border border-slate-600/50" contenteditable="true" data-member-id="${member.id}" data-field="role">
                             ${member.role}
                         </span>
                     </div>
-                    <p class="mt-1 text-gray-500 text-sm truncate">Core Platform</p>
+                    <p class="mt-1 text-slate-400 text-sm truncate">Core Platform</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <img class="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0" src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" alt="${member.name}">
-                    <button class="delete-member-btn opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600" onclick="deleteMemberConfirm(event, '${member.id}')">
+                    <img class="w-12 h-12 rounded-full flex-shrink-0 ring-2 ring-slate-700" src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" alt="${member.name}">
+                    <button class="delete-member-btn opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" onclick="removeMemberFromTeam('${member.id}')">
                         <i data-lucide="trash-2" class="h-4 w-4"></i>
                     </button>
                 </div>
-            </div >
-    <div class="p-5 min-h-[160px]">
-        ${assignedTask ?
-            renderTaskOnCard(assignedTask) :
-            `<div class="flex items-center justify-center h-full">
-                        <p class="text-sm text-gray-400 italic">No task assigned for this project.</p>
+            </div>
+            <div class="p-5 min-h-[180px] bg-slate-800/30">
+                ${assignedTask ?
+                renderTaskOnCard(assignedTask) :
+                `<div class="flex items-center justify-center h-full">
+                        <p class="text-sm text-slate-400 italic">No task assigned for this project.</p>
                      </div>`
-        }
-    </div>
-`;
+            }
+            </div>
+        `;
         container.appendChild(card);
 
         // Add event listeners for editable fields
@@ -596,37 +598,81 @@ async function renderTeamCards() {
                 }
             });
         });
+
+        // Ensure assigned task is draggable
+        const assignedTaskCard = card.querySelector('.task-card-assigned');
+        if (assignedTaskCard) {
+            assignedTaskCard.draggable = true;
+            assignedTaskCard.addEventListener('dragstart', handleDragStart);
+            assignedTaskCard.addEventListener('dragend', handleDragEnd);
+        }
     });
 }
 
 function renderTaskOnCard(task) {
     const priorityClass = getPriorityClasses(task.priority);
+    const hasTechStack = task.techStack && task.techStack.techStack && task.techStack.techStack.length > 0;
+    
+    let techStackHtml = '';
+    if (hasTechStack) {
+        const topTech = task.techStack.techStack.slice(0, 3);
+        techStackHtml = `
+            <div class="mt-3 pt-3 border-t border-slate-600/30">
+                <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
+                    <i data-lucide="code" class="mr-1.5 h-3.5 w-3.5 text-emerald-500"></i>
+                    Suggested Tech Stack
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                    ${topTech.map(tech => `
+                        <span class="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md" title="${tech.purpose}">
+                            ${tech.name}
+                        </span>
+                    `).join('')}
+                    ${task.techStack.techStack.length > 3 ? `<span class="text-xs text-slate-400">+${task.techStack.techStack.length - 3} more</span>` : ''}
+                </div>
+                <button class="mt-2 text-xs text-emerald-400 hover:text-emerald-300 transition-colors" onclick="showTechStackModal(event, '${task.id}')">
+                    View Details →
+                </button>
+            </div>
+        `;
+    } else {
+        techStackHtml = `
+            <div class="mt-3 pt-3 border-t border-slate-600/30">
+                <button class="w-full text-xs px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg transition-all flex items-center justify-center gap-2" onclick="generateTechStack(event, '${task.id}')">
+                    <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+                    Suggest Tech Stack
+                </button>
+            </div>
+        `;
+    }
+    
     return `
-    < div class="task-card-assigned relative group" draggable = "true" data - task - id="${task.id}" data - project - id="${task.projectId}" >
-            <button class="absolute top-0 right-0 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600" onclick="deleteTaskConfirm(event, '${task.id}')">
+        <div class="task-card-assigned relative group p-4 bg-slate-700/30 rounded-lg border border-slate-600/30 hover:border-emerald-500/30 transition-all" draggable="true" data-task-id="${task.id}" data-project-id="${task.projectId}">
+            <button class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" onclick="deleteTaskConfirm(event, '${task.id}')">
                 <i data-lucide="trash-2" class="h-4 w-4"></i>
             </button>
-            <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Current Task</h4>
-            <p class="mt-1 text-sm text-gray-800 font-medium editable-field" contenteditable="true" data-task-id="${task.id}" data-field="title">${task.title}</p>
+            <h4 class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Current Task</h4>
+            <p class="mt-2 text-sm text-slate-100 font-semibold editable-field" contenteditable="true" data-task-id="${task.id}" data-field="title">${task.title}</p>
             
-            <div class="mt-4 flex justify-between items-start">
-                <div>
-                    <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</h4>
-                    <select class="mt-1 text-xs font-medium px-2.5 py-0.5 rounded-full border-0 ${priorityClass}" data-task-id="${task.id}" data-field="priority">
+            <div class="mt-4 flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Priority</h4>
+                    <select class="text-xs font-semibold px-3 py-1.5 rounded-full border-0 ${priorityClass} cursor-pointer hover:opacity-80 transition-opacity" data-task-id="${task.id}" data-field="priority">
                         <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
                         <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
                         <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
                     </select>
                 </div>
-                <div class="text-right">
-                    <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center justify-end">
-                        <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-gray-400"></i>
+                <div class="flex-1 text-right">
+                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-end mb-2">
+                        <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-slate-500"></i>
                         Deadline
                     </h4>
-                    <p class="mt-1 text-sm text-gray-800 font-medium editable-field" contenteditable="true" data-task-id="${task.id}" data-field="deadline">${task.deadline}</p>
+                    <p class="text-sm text-slate-100 font-semibold editable-field" contenteditable="true" data-task-id="${task.id}" data-field="deadline">${task.deadline}</p>
                 </div>
             </div>
-        </div >
+            ${techStackHtml}
+        </div>
     `;
 }
 
@@ -642,47 +688,47 @@ async function renderProjectBacklog() {
     const backlogTasks = project.tasks.filter(task => task.assignedTo === null);
 
     const titleEl = document.getElementById('project-backlog-title');
-    titleEl.textContent = `${ project.name } Backlog`;
+    titleEl.textContent = `${project.name} Tasks`;
     titleEl.dataset.projectId = project.id;
 
     const list = document.getElementById('project-backlog-list');
     list.innerHTML = '';
 
     if (backlogTasks.length === 0) {
-        list.innerHTML = `< li class="text-sm text-gray-400 italic text-center mt-4" > Backlog is empty!</li > `;
+        list.innerHTML = `<li class="text-sm text-slate-400 italic text-center mt-4">No unassigned tasks!</li>`;
         return;
     }
 
     backlogTasks.forEach(task => {
         const priorityClass = getPriorityClasses(task.priority);
         const taskCard = document.createElement('li');
-        taskCard.className = 'p-3 bg-slate-50 rounded-md border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing relative group';
+        taskCard.className = 'p-4 bg-gradient-to-r from-slate-800/60 to-slate-800/40 backdrop-blur-sm rounded-xl border border-slate-700/50 shadow-lg hover:border-emerald-500/50 hover:shadow-emerald-500/10 cursor-grab active:cursor-grabbing relative group transition-all';
         taskCard.draggable = true;
         taskCard.dataset.taskId = task.id;
         taskCard.dataset.projectId = project.id;
 
         taskCard.innerHTML = `
-    < button class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600" onclick = "deleteTaskConfirm(event, '${task.id}')" >
-        <i data-lucide="trash-2" class="h-4 w-4"></i>
-            </button >
-            <p class="text-sm font-medium text-gray-800 pr-8">${task.title}</p>
-            <div class="mt-2 flex justify-between items-center">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${priorityClass}">
+            <button class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg p-1.5 transition-all" onclick="deleteTaskConfirm(event, '${task.id}')">
+                <i data-lucide="trash-2" class="h-4 w-4"></i>
+            </button>
+            <p class="text-sm font-semibold text-slate-100 pr-10">${task.title}</p>
+            <div class="mt-3 flex justify-between items-center">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${priorityClass}">
                     ${task.priority}
                 </span>
-                <span class="text-xs font-medium text-gray-500 flex items-center">
-                    <i data-lucide="calendar" class="mr-1 h-3.5 w-3.5 text-gray-400"></i>
+                <span class="text-xs font-medium text-slate-400 flex items-center">
+                    <i data-lucide="calendar" class="mr-1.5 h-3.5 w-3.5 text-slate-500"></i>
                     ${task.deadline}
                 </span>
             </div>
-`;
+        `;
         list.appendChild(taskCard);
     });
 }
 
 function updateMainHeader() {
     const project = state.projects[state.currentProjectId];
-    const title = project ? `Core Platform Team - ${ project.name } ` : 'Core Platform Team';
+    const title = project ? `Core Platform Team - ${project.name}` : 'Core Platform Team';
     document.getElementById('main-dashboard-title').textContent = title;
 }
 
@@ -921,7 +967,7 @@ async function handleMemberDropOnProject(e) {
 
             // Check if member is already assigned
             if (project.teamMembers && project.teamMembers.includes(memberId)) {
-                notifications.warning(`${ member.name } is already assigned to ${ project.name } `);
+                notifications.warning(`${member.name} is already assigned to ${project.name} `);
                 return;
             }
 
@@ -933,7 +979,7 @@ async function handleMemberDropOnProject(e) {
             }
             project.teamMembers.push(memberId);
 
-            notifications.success(`${ member.name } added to ${ project.name } `);
+            notifications.success(`${member.name} added to ${project.name} `);
 
             // Update UI if we're viewing this project
             if (state.currentProjectId === projectId) {
@@ -980,14 +1026,14 @@ async function deleteMemberConfirm(event, memberId) {
     const member = state.teamMembers.find(m => m.id === memberId);
     const confirmed = await confirmation.show({
         title: 'Remove Team Member',
-        message: `Are you sure you want to remove ${ member?.name || 'this member' } from the team ? This action cannot be undone.`,
+        message: `Are you sure you want to remove ${member?.name || 'this member'} from the team ? This action cannot be undone.`,
         confirmText: 'Remove Member',
         type: 'danger',
         onConfirm: async () => {
             await deleteMember(memberId);
             state.teamMembers = state.teamMembers.filter(m => m.id !== memberId);
             delete state.members[memberId]; // Remove from members lookup
-            notifications.success(`${ member?.name || 'Member' } has been removed successfully`);
+            notifications.success(`${member?.name || 'Member'} has been removed successfully`);
             await renderAll();
         }
     });
@@ -1185,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const project = state.projects[state.currentProjectId];
             const projectPrefix = state.currentProjectId.substring(0, 1);
             const taskCount = project.tasks.length;
-            const newTaskId = `${ projectPrefix } -t${ taskCount + 1 } `;
+            const newTaskId = `${projectPrefix} -t${taskCount + 1} `;
 
             const newTask = {
                 id: newTaskId,
@@ -1258,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const memberId = `tm${ state.teamMembers.length + 1 } `;
+            const memberId = `tm${state.teamMembers.length + 1} `;
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
             const colors = ['60a5fa', 'ec4899', 'f59e0b', '8b5cf6', '10b981', 'ef4444', '3b82f6'];
             const randomColor = colors[Math.floor(Math.random() * colors.length)];
@@ -1289,12 +1335,157 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Add Member to Project Modal handling
+    const addMemberToProjectBtn = document.getElementById('add-member-to-project-btn');
+    const addMemberToProjectModal = document.getElementById('add-member-to-project-modal');
+    const closeAddMemberModal = document.getElementById('close-add-member-modal');
+    const addMemberSearch = document.getElementById('add-member-search');
+    const availableMembersList = document.getElementById('available-members-list');
+
+    if (addMemberToProjectBtn && addMemberToProjectModal) {
+        addMemberToProjectBtn.addEventListener('click', () => {
+            const project = state.projects[state.currentProjectId];
+            if (!project) {
+                notifications.warning('Please select a project first');
+                return;
+            }
+            renderAvailableMembers();
+            addMemberToProjectModal.classList.remove('hidden');
+        });
+    }
+
+    if (closeAddMemberModal && addMemberToProjectModal) {
+        closeAddMemberModal.addEventListener('click', () => {
+            addMemberToProjectModal.classList.add('hidden');
+        });
+    }
+
+    if (addMemberToProjectModal) {
+        addMemberToProjectModal.addEventListener('click', (e) => {
+            if (e.target === addMemberToProjectModal) {
+                addMemberToProjectModal.classList.add('hidden');
+            }
+        });
+    }
+
+    if (addMemberSearch) {
+        addMemberSearch.addEventListener('input', (e) => {
+            renderAvailableMembers(e.target.value.toLowerCase());
+        });
+    }
+
+    function renderAvailableMembers(searchQuery = '') {
+        if (!availableMembersList) return;
+
+        const project = state.projects[state.currentProjectId];
+        if (!project) return;
+
+        const projectMemberIds = project.teamMembers || [];
+        const availableMembers = state.teamMembers.filter(member => {
+            const notInProject = !projectMemberIds.includes(member.id);
+            const matchesSearch = searchQuery === '' ||
+                member.name.toLowerCase().includes(searchQuery) ||
+                member.role.toLowerCase().includes(searchQuery);
+            return notInProject && matchesSearch;
+        });
+
+        if (availableMembers.length === 0) {
+            availableMembersList.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <i data-lucide="users" class="h-12 w-12 mx-auto mb-2 text-gray-400"></i>
+                    <p class="text-sm">${searchQuery ? 'No members found' : 'All members are already in this project'}</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            return;
+        }
+
+        availableMembersList.innerHTML = '';
+        availableMembers.forEach(member => {
+            const memberCard = document.createElement('div');
+            memberCard.className = 'flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-all cursor-pointer';
+
+            memberCard.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <img class="w-10 h-10 rounded-full" 
+                         src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
+                         alt="${member.name}">
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-900">${member.name}</h4>
+                        <p class="text-xs text-gray-500">${member.role}</p>
+                    </div>
+                </div>
+                <button class="add-member-btn inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 transition-colors">
+                    <i data-lucide="plus" class="h-3.5 w-3.5 mr-1"></i>
+                    Add
+                </button>
+            `;
+
+            const addBtn = memberCard.querySelector('.add-member-btn');
+            addBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                await addMemberToCurrentProject(member.id);
+            });
+
+            memberCard.addEventListener('click', async () => {
+                await addMemberToCurrentProject(member.id);
+            });
+
+            availableMembersList.appendChild(memberCard);
+        });
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function addMemberToCurrentProject(memberId) {
+        const project = state.projects[state.currentProjectId];
+        if (!project) return;
+
+        const member = state.teamMembers.find(m => m.id === memberId);
+        if (!member) return;
+
+        try {
+            await assignMemberToProject(project.id, memberId);
+
+            if (!project.teamMembers) {
+                project.teamMembers = [];
+            }
+            project.teamMembers.push(memberId);
+
+            notifications.success(`${member.name} added to ${project.name}`);
+            renderAvailableMembers();
+            await renderAll();
+        } catch (error) {
+            console.error('Failed to add member:', error);
+            notifications.error('Failed to add member. Please try again.');
+        }
+    }
+
     // Create Project Modal handling
     const createProjectButton = document.getElementById('create-project-button');
     const projectModal = document.getElementById('project-modal');
     const cancelProjectButton = document.getElementById('cancel-project-button');
     const submitProjectButton = document.getElementById('submit-project-button');
     const projectForm = document.getElementById('project-form');
+    const aiToggle = document.getElementById('use-ai-toggle');
+    const aiUploadSection = document.getElementById('ai-upload-section');
+    const manualDescSection = document.getElementById('manual-description-section');
+    const manualColorSection = document.getElementById('manual-color-section');
+
+    // Toggle AI-assisted mode
+    if (aiToggle && aiUploadSection && manualDescSection && manualColorSection) {
+        aiToggle.addEventListener('change', () => {
+            if (aiToggle.checked) {
+                aiUploadSection.classList.remove('hidden');
+                manualDescSection.classList.add('hidden');
+                manualColorSection.classList.add('hidden');
+            } else {
+                aiUploadSection.classList.add('hidden');
+                manualDescSection.classList.remove('hidden');
+                manualColorSection.classList.remove('hidden');
+            }
+        });
+    }
 
     if (createProjectButton && projectModal) {
         createProjectButton.addEventListener('click', () => {
@@ -1322,11 +1513,16 @@ document.addEventListener('DOMContentLoaded', () => {
         submitProjectButton.addEventListener('click', async () => {
             const projectNameEl = document.getElementById('project-name');
             const projectDescEl = document.getElementById('project-description');
+            const aiToggle = document.getElementById('use-ai-toggle');
+            const aiPdfUpload = document.getElementById('ai-pdf-upload');
 
             if (!projectNameEl || !projectDescEl) return;
 
             const name = projectNameEl.value.trim();
             const description = projectDescEl.value.trim();
+            const useAI = aiToggle && aiToggle.checked;
+            const pdfFile = aiPdfUpload && aiPdfUpload.files[0];
+
             const colorRadios = document.querySelectorAll('input[name="project-color"]');
             let color = 'blue';
             colorRadios.forEach(radio => {
@@ -1338,6 +1534,72 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // AI-Assisted project creation
+            if (useAI && pdfFile) {
+                try {
+                    submitProjectButton.disabled = true;
+                    submitProjectButton.innerHTML = '<i data-lucide="loader" class="h-4 w-4 mr-2 animate-spin"></i> Processing with AI...';
+                    lucide.createIcons();
+
+                    // Step 1: Upload PDF and create MCP project
+                    const formData = new FormData();
+                    formData.append('project_name', name);
+                    formData.append('pdf_file', pdfFile);
+
+                    const createResponse = await fetch('/api/mcp-projects/create', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!createResponse.ok) throw new Error('Failed to upload PDF');
+                    const createResult = await createResponse.json();
+                    const mcpProjectId = createResult.project.id;
+
+                    // Step 2: Analyze with Gemini AI
+                    submitProjectButton.innerHTML = '<i data-lucide="sparkles" class="h-4 w-4 mr-2 animate-pulse"></i> Analyzing with AI...';
+                    lucide.createIcons();
+
+                    const analyzeResponse = await fetch(`/api/mcp-projects/${mcpProjectId}/analyze`, {
+                        method: 'POST'
+                    });
+
+                    if (!analyzeResponse.ok) throw new Error('Failed to analyze document');
+
+                    // Step 3: Create dashboard project from analysis
+                    submitProjectButton.innerHTML = '<i data-lucide="layout-dashboard" class="h-4 w-4 mr-2"></i> Creating project...';
+                    lucide.createIcons();
+
+                    const dashboardResponse = await fetch(`/api/mcp-projects/${mcpProjectId}/create-dashboard-project`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (!dashboardResponse.ok) {
+                        const error = await dashboardResponse.json();
+                        throw new Error(error.error || 'Failed to create project');
+                    }
+
+                    const dashboardResult = await dashboardResponse.json();
+                    notifications.success(`🎉 Project created with ${dashboardResult.tasks_created} AI-generated tasks!`);
+
+                    projectModal.classList.add('hidden');
+                    projectForm.reset();
+
+                    // Reload page to show new project
+                    window.location.reload();
+
+                } catch (error) {
+                    console.error('AI project creation error:', error);
+                    notifications.error(`Failed to create AI project: ${error.message}`);
+                } finally {
+                    submitProjectButton.disabled = false;
+                    submitProjectButton.innerHTML = '<i data-lucide="check" class="h-4 w-4 mr-2"></i> Create Project';
+                    lucide.createIcons();
+                }
+                return;
+            }
+
+            // Manual project creation (existing code)
             const projectId = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
             const newProject = {
@@ -1470,7 +1732,7 @@ function renderTeamManagementModal() {
     } else {
         noTeamMembers.classList.add('hidden');
         currentTeamList.innerHTML = currentTeamMembers.map(member => `
-    < div class="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200" >
+            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-md border border-blue-200">
                 <div class="flex items-center space-x-3">
                     <img class="w-8 h-8 rounded-full" 
                          src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
@@ -1484,8 +1746,8 @@ function renderTeamManagementModal() {
                         class="text-red-500 hover:text-red-700 p-1">
                     <i data-lucide="x" class="h-4 w-4"></i>
                 </button>
-            </div >
-    `).join('');
+            </div>
+        `).join('');
     }
 
     // Render available members
@@ -1493,7 +1755,7 @@ function renderTeamManagementModal() {
         availableMembersList.innerHTML = '<p class="text-sm text-gray-400 italic text-center py-4">No available members</p>';
     } else {
         availableMembersList.innerHTML = availableMembers.map(member => `
-    < div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors" >
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
                 <div class="flex items-center space-x-3">
                     <img class="w-8 h-8 rounded-full" 
                          src="https://placehold.co/100x100/${member.avatarColor}/ffffff?text=${member.avatar}" 
@@ -1507,7 +1769,7 @@ function renderTeamManagementModal() {
                         class="px-3 py-1 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">
                     Add
                 </button>
-            </div >
+            </div>
     `).join('');
     }
 
@@ -1529,7 +1791,7 @@ async function addMemberToTeam(memberId) {
         project.teamMembers.push(memberId);
 
         const member = state.members[memberId];
-        notifications.success(`${ member.name } added to team`);
+        notifications.success(`${member.name} added to team`);
 
         renderTeamManagementModal();
         renderMemberDirectory();
@@ -1548,7 +1810,7 @@ async function removeMemberFromTeam(memberId) {
     try {
         const confirmed = await confirmation.show({
             title: 'Remove Team Member',
-            message: `Are you sure you want to remove ${ member.name } from this project ? `,
+            message: `Are you sure you want to remove ${member.name} from this project ? `,
             danger: true,
             confirmText: 'Remove',
             async onConfirm() {
@@ -1559,9 +1821,18 @@ async function removeMemberFromTeam(memberId) {
                         project.teamMembers = project.teamMembers.filter(id => id !== memberId);
                     }
 
-                    renderTeamManagementModal();
-                    renderMemberDirectory();
-                    notifications.success(`${ member.name } removed from team`);
+                    // Unassign any tasks assigned to this member in this project
+                    if (project.tasks) {
+                        project.tasks.forEach(task => {
+                            if (task.assignedTo === memberId) {
+                                task.assignedTo = null;
+                            }
+                        });
+                    }
+
+                    // Re-render all relevant sections
+                    await renderAll();
+                    notifications.success(`${member.name} removed from team`);
                 } catch (error) {
                     console.error('Failed to remove member from project:', error);
                     notifications.error('Failed to remove member. Please try again.');
@@ -1580,4 +1851,170 @@ function openProjectModal() {
     if (modal) {
         modal.classList.remove('hidden');
     }
+}
+
+// Tech Stack Suggestions
+async function generateTechStack(event, taskId) {
+    event.stopPropagation();
+    event.preventDefault();
+    
+    const button = event.currentTarget;
+    const originalHtml = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i data-lucide="loader" class="h-3.5 w-3.5 animate-spin"></i> Generating...';
+    lucide.createIcons();
+    
+    try {
+        const response = await fetch(`${API_BASE}/tasks/${taskId}/suggest-tech-stack`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (!response.ok) throw new Error('Failed to generate tech stack');
+        
+        const result = await response.json();
+        
+        notifications.success(`Tech stack suggested by ${result.generatedBy}`);
+        
+        // Reload data to show the updated tech stack
+        await loadProjects();
+        renderAll();
+        
+    } catch (error) {
+        console.error('Failed to generate tech stack:', error);
+        notifications.error('Failed to generate tech stack. Please try again.');
+        button.disabled = false;
+        button.innerHTML = originalHtml;
+        lucide.createIcons();
+    }
+}
+
+function showTechStackModal(event, taskId) {
+    event.stopPropagation();
+    event.preventDefault();
+    
+    // Find the task
+    let task = null;
+    for (const projectId in state.projects) {
+        const project = state.projects[projectId];
+        task = project.tasks.find(t => t.id === taskId);
+        if (task) break;
+    }
+    
+    if (!task || !task.techStack) {
+        notifications.error('Tech stack not found');
+        return;
+    }
+    
+    const techStack = task.techStack;
+    
+    let modalHtml = `
+        <div id="tech-stack-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick="this.remove()">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+                <div class="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex justify-between items-start">
+                    <div>
+                        <h2 class="text-xl font-bold text-emerald-400">Tech Stack Suggestions</h2>
+                        <p class="text-sm text-slate-400 mt-1">${task.title}</p>
+                    </div>
+                    <button onclick="document.getElementById('tech-stack-modal').remove()" class="text-slate-400 hover:text-slate-100 transition-colors">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <!-- Tech Stack -->
+                    ${techStack.techStack && techStack.techStack.length > 0 ? `
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-100 mb-3 flex items-center">
+                                <i data-lucide="layers" class="h-5 w-5 mr-2 text-emerald-400"></i>
+                                Technologies & Frameworks
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                ${techStack.techStack.map(tech => `
+                                    <div class="p-4 bg-slate-700/50 rounded-lg border border-slate-600/30">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <h4 class="font-semibold text-slate-100">${tech.name}</h4>
+                                            <span class="text-xs px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded">${tech.category}</span>
+                                        </div>
+                                        <p class="text-sm text-slate-400">${tech.purpose}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Tools -->
+                    ${techStack.tools && techStack.tools.length > 0 ? `
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-100 mb-3 flex items-center">
+                                <i data-lucide="wrench" class="h-5 w-5 mr-2 text-emerald-400"></i>
+                                Development Tools
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                ${techStack.tools.map(tool => `
+                                    <div class="p-4 bg-slate-700/50 rounded-lg border border-slate-600/30">
+                                        <h4 class="font-semibold text-slate-100 mb-1">${tool.name}</h4>
+                                        <p class="text-sm text-slate-400">${tool.purpose}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Best Practices -->
+                    ${techStack.bestPractices && techStack.bestPractices.length > 0 ? `
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-100 mb-3 flex items-center">
+                                <i data-lucide="check-circle" class="h-5 w-5 mr-2 text-emerald-400"></i>
+                                Best Practices
+                            </h3>
+                            <ul class="space-y-2">
+                                ${techStack.bestPractices.map(practice => `
+                                    <li class="flex items-start text-slate-300">
+                                        <span class="text-emerald-400 mr-2">•</span>
+                                        <span class="text-sm">${practice}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Resources -->
+                    ${techStack.resources && techStack.resources.length > 0 ? `
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-100 mb-3 flex items-center">
+                                <i data-lucide="book-open" class="h-5 w-5 mr-2 text-emerald-400"></i>
+                                Learning Resources
+                            </h3>
+                            <div class="space-y-2">
+                                ${techStack.resources.map(resource => `
+                                    <a href="${resource.url}" target="_blank" class="block p-4 bg-slate-700/50 rounded-lg border border-slate-600/30 hover:border-emerald-500/50 transition-all group">
+                                        <h4 class="font-semibold text-slate-100 group-hover:text-emerald-400 transition-colors">${resource.title}</h4>
+                                        <p class="text-sm text-slate-400 mt-1">${resource.description}</p>
+                                        <div class="text-xs text-emerald-400 mt-2 flex items-center">
+                                            <span class="truncate">${resource.url}</span>
+                                            <i data-lucide="external-link" class="h-3 w-3 ml-1 flex-shrink-0"></i>
+                                        </div>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="sticky bottom-0 bg-slate-800 border-t border-slate-700 p-6 flex justify-end gap-3">
+                    <button onclick="generateTechStack(event, '${taskId}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                        Regenerate
+                    </button>
+                    <button onclick="document.getElementById('tech-stack-modal').remove()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded-lg transition-all">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    lucide.createIcons();
 }
