@@ -1,0 +1,500 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- UNIVERSAL PREAMBLE BLOCK ---
+% 1. Geometry
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% 2. Font & Babel Setup
+\usepackage{fontspec}
+\usepackage[english]{babel}
+
+% 3. Set default fonts (using system fonts that should be available)
+\setmainfont{Times New Roman}[
+    Path = ,
+    Extension = .ttf,
+    UprightFont = *,
+    BoldFont = * Bold,
+    ItalicFont = * Italic,
+    BoldItalicFont = * Bold Italic,
+]
+% Fallback: If Times New Roman is not available, use Latin Modern
+\IfFontExistsTF{Times New Roman}{
+    \setmainfont{Times New Roman}
+}{
+    \setmainfont{Latin Modern Roman}
+}
+\setsansfont{Arial}[Scale=MatchLowercase]
+\IfFontExistsTF{Arial}{
+    \setsansfont{Arial}[Scale=MatchLowercase]
+}{
+    \setsansfont{Latin Modern Sans}[Scale=MatchLowercase]
+}
+\setmonofont{Courier New}[Scale=MatchLowercase]
+\IfFontExistsTF{Courier New}{
+    \setmonofont{Courier New}[Scale=MatchLowercase]
+}{
+    \setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+}
+
+% --- Additional Packages for this Document ---
+\usepackage{booktabs} % For professional tables
+\usepackage{parskip}  % Use spacing between paragraphs, not indentation
+\usepackage{enumitem} % For list customization
+\usepackage{titling}  % To customize title
+\usepackage{hyperref} % For links, must be last
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    hidelinks, % Hide the visible boxes/colors
+    pdfauthor={AlturaSoft},
+    pdftitle={AlturaSoft — Engineering & Services Organization}
+}
+
+% --- Title Customization ---
+\title{AlturaSoft — Engineering \& Services Organization}
+\author{Onboarding Data Pack (Fictional, for demonstration)}
+\date{Prepared: November 08, 2025}
+
+% --- Document Start ---
+\begin{document}
+
+\maketitle
+
+\section*{Company Overview}
+AlturaSoft builds and operates the Altura Cloud Platform (ACP) and Altura InsightHub, serving enterprise customers globally. In addition to our SaaS products, we deliver Professional Services for implementations, integrations, and managed SRE operations.
+
+\begin{itemize}[leftmargin=*, label=\textbf{•}]
+    \item \textbf{Products:} Altura Cloud Platform (multi-tenant SaaS), Altura InsightHub (analytics \& dashboards).
+    \item \textbf{Service Lines:} Solutions Engineering (pre-sales), Customer Implementations, Managed Services (SRE-as-a-Service).
+    \item \textbf{Primary Tech Stack:} AWS, Kubernetes, Terraform, Go, Java, TypeScript, Python, PostgreSQL, Kafka, Snowflake, GitHub Actions, Datadog, Vault.
+    \item \textbf{Compliance \& Security:} SOC 2 Type II and ISO 27001 programs; SSO via Okta; MFA enforced; least-privilege access; secrets in Vault.
+\end{itemize}
+
+\section*{Organization Overview}
+\begin{itemize}[leftmargin=*, label=\textbf{•}]
+    \item \textbf{Product Engineering} — Group Manager: Nina Patel (Sr. Director of Product Engineering)
+    \item \textbf{Data \& Machine Learning} — Group Manager: Dr. Carlos Mendes (Sr. Director of Data \& ML)
+    \item \textbf{Cloud Infrastructure \& SRE} — Group Manager: Aisha Al-Hassan (Director of Cloud Infrastructure)
+    \item \textbf{Security \& Compliance} — Group Manager: Thomas Gallagher (Director of Security \& Compliance)
+    \item \textbf{Quality Engineering} — Group Manager: Mei Lin (Director of Quality Engineering)
+    \item \textbf{Professional Services} — Group Manager: James Okoro (Sr. Director of Services)
+\end{itemize}
+
+\section{Product Engineering}
+\textbf{Group Manager: Nina Patel (Sr. Director of Product Engineering)}
+
+\subsection{Core Platform}
+\paragraph*{Specialization:} Multi-tenant microservices platform powering authentication, configuration, service discovery, and billing orchestration.
+
+\paragraph*{Scope \& Responsibilities:}
+\begin{itemize}
+    \item Owns core microservices (identity, config, service registry) and platform SDKs
+    \item Defines service templates and golden paths for new services
+    \item Performance, cost, and reliability optimization across backend tier
+\end{itemize}
+
+\paragraph*{Primary Technologies:} Go, Java (Spring Boot), PostgreSQL, Redis, Apache Kafka, gRPC/REST, Kubernetes, Istio, GitHub Actions
+
+\paragraph*{Key Systems Owned:} identity-service, config-service, service-registry, billing-orchestrator
+
+\paragraph*{SLOs/SLAs:} 99.95\% monthly availability for identity-service; p95 latency $\le$ 150ms for config lookups
+
+\paragraph*{On-call \& Support:} Follow-the-sun rotation, 1 week primary + 1 week shadow; Sev1 response $\le$ 5 minutes.
+
+\paragraph*{Cross-functional Partners:} Product Management, Design, SRE, Security, QE, and Professional Services as appropriate.
+
+\paragraph*{Contacts:} Slack \#eng-core-platform \textbullet{} DL \href{mailto:eng-core-platform@alturasoft.example}{eng-core-platform@alturasoft.example} \textbullet{} Jira PLAT
+
+\paragraph*{Team Roster \& Reporting:}
+Manager Lucas Werner reports to Group Manager Nina Patel (Sr. Director of Product Engineering).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Lucas Werner & San Francisco, USA (PT) & \href{mailto:lucas.werner@alturasoft.example}{lucas.werner@alturasoft.example} \\
+Team Lead & Priya Desai & Austin, USA (CT) & \href{mailto:priya.desai@alturasoft.example}{priya.desai@alturasoft.example} \\
+Principal Engineer & Hao Nguyen & New York, USA (ET) & \href{mailto:hao.nguyen@alturasoft.example}{hao.nguyen@alturasoft.example} \\
+Senior Engineer & Marta Kowalski & Toronto, CAN (ET) & \href{mailto:marta.kowalski@alturasoft.example}{marta.kowalski@alturasoft.example} \\
+Senior Engineer & Diego Silva & London, UK (GMT) & \href{mailto:diego.silva@alturasoft.example}{diego.silva@alturasoft.example} \\
+Associate Engineer & Ananya Rao & Berlin, DE (CET) & \href{mailto:ananya.rao@alturasoft.example}{ananya.rao@alturasoft.example} \\
+Associate Engineer & Ethan Brooks & Dublin, IE (GMT) & \href{mailto:ethan.brooks@alturasoft.example}{ethan.brooks@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{API \& Integrations}
+% ... Content for API & Integrations ...
+\paragraph*{Specialization:} Public REST/GraphQL APIs and first-party integrations/SDKs for customers and partners.
+\paragraph*{Contacts:} Slack \#eng-api \textbullet{} DL \href{mailto:eng-api@alturasoft.example}{eng-api@alturasoft.example} \textbullet{} Jira API
+
+\paragraph*{Team Roster \& Reporting:}
+Manager Sarah O’Connell reports to Group Manager Nina Patel (Sr. Director of Product Engineering).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Sarah O’Connell & Bengaluru, IN (IST) & \href{mailto:sarah.oconnell@alturasoft.example}{sarah.oconnell@alturasoft.example} \\
+Team Lead & Ahmed El-Sayed & Singapore (SGT) & \href{mailto:ahmed.el-sayed@alturasoft.example}{ahmed.el-sayed@alturasoft.example} \\
+Principal Engineer & Yuki Tanaka & San Francisco, USA (PT) & \href{mailto:yuki.tanaka@alturasoft.example}{yuki.tanaka@alturasoft.example} \\
+Senior Engineer & Jacob Martinez & Austin, USA (CT) & \href{mailto:jacob.martinez@alturasoft.example}{jacob.martinez@alturasoft.example} \\
+Senior Engineer & Olga Petrova & New York, USA (ET) & \href{mailto:olga.petrova@alturasoft.example}{olga.petrova@alturasoft.example} \\
+Associate Engineer & Lina Haddad & Toronto, CAN (ET) & \href{mailto:lina.haddad@alturasoft.example}{lina.haddad@alturasoft.example} \\
+Associate Engineer & David Kim & London, UK (GMT) & \href{mailto:david.kim@alturasoft.example}{david.kim@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Web \& Mobile Apps}
+% ... Content for Web & Mobile Apps ...
+\paragraph*{Specialization:} Customer-facing admin console (web) and companion iOS/Android apps.
+\paragraph*{Contacts:} Slack \#app-web-mobile \textbullet{} DL \href{mailto:app-web-mobile@alturasoft.example}{app-web-mobile@alturasoft.example} \textbullet{} Jira APP
+
+\paragraph*{Team Roster \& Reporting:}
+Manager Elena Rossi reports to Group Manager Nina Patel (Sr. Director of Product Engineering).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Elena Rossi & Berlin, DE (CET) & \href{mailto:elena.rossi@alturasoft.example}{elena.rossi@alturasoft.example} \\
+Team Lead & Mark Chen & Dublin, IE (GMT) & \href{mailto:mark.chen@alturasoft.example}{mark.chen@alturasoft.example} \\
+Principal Engineer & Rohan Iyer & Bengaluru, IN (IST) & \href{mailto:rohan.iyer@alturasoft.example}{rohan.iyer@alturasoft.example} \\
+Senior Engineer & Hannah Schultz & Singapore (SGT) & \href{mailto:hannah.schultz@alturasoft.example}{hannah.schultz@alturasoft.example} \\
+Senior Engineer & Gabriel Vieira & San Francisco, USA (PT) & \href{mailto:gabriel.vieira@alturasoft.example}{gabriel.vieira@alturasoft.example} \\
+Associate Engineer & Zoe Carter & Austin, USA (CT) & \href{mailto:zoe.carter@alturasoft.example}{zoe.carter@alturasoft.example} \\
+Associate Engineer & Yu Wang & New York, USA (ET) & \href{mailto:yu.wang@alturasoft.example}{yu.wang@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Data \& Machine Learning}
+\textbf{Group Manager: Dr. Carlos Mendes (Sr. Director of Data \& ML)}
+
+\subsection{Data Platform}
+% ... Content for Data Platform ...
+\paragraph*{Specialization:} Reliable ingestion, transformation, and governance for analytics \& ML; single source of truth.
+\paragraph*{Contacts:} Slack \#data-platform \textbullet{} DL \href{mailto:data-platform@alturasoft.example}{data-platform@alturasoft.example} \textbullet{} Jira DATA
+
+\paragraph*{Team Roster \& Reporting:}
+Manager Benjamin Owens reports to Group Manager Dr. Carlos Mendes (Sr. Director of Data \& ML).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Benjamin Owens & Toronto, CAN (ET) & \href{mailto:benjamin.owens@alturasoft.example}{benjamin.owens@alturasoft.example} \\
+Team Lead & Svetlana Ivanova & London, UK (GMT) & \href{mailto:svetlana.ivanova@alturasoft.example}{svetlana.ivanova@alturasoft.example} \\
+Principal Engineer & Aman Gupta & Berlin, DE (CET) & \href{mailto:aman.gupta@alturasoft.example}{aman.gupta@alturasoft.example} \\
+Senior Engineer & Nhlanhla Dlamini & Dublin, IE (GMT) & \href{mailto:nhlanhla.dlamini@alturasoft.example}{nhlanhla.dlamini@alturasoft.example} \\
+Senior Engineer & Julia Park & Bengaluru, IN (IST) & \href{mailto:julia.park@alturasoft.example}{julia.park@alturasoft.example} \\
+Associate Engineer & Omar Farouk & Singapore (SGT) & \href{mailto:omar.farouk@alturasoft.example}{omar.farouk@alturasoft.example} \\
+Associate Engineer & Sara Johansson & San Francisco, USA (PT) & \href{mailto:sara.johansson@alturasoft.example}{sara.johansson@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Analytics \& ML}
+% ... Content for Analytics & ML ...
+\paragraph*{Specialization:} Feature engineering, model development, offline/online inference, and experimentation.
+\paragraph*{Contacts:} Slack \#ml-analytics \textbullet{} DL \href{mailto:ml-analytics@alturasoft.example}{ml-analytics@alturasoft.example} \textbullet{} Jira ML
+
+\paragraph*{Team Roster \& Reporting:}
+Manager Lila Kapoor reports to Group Manager Dr. Carlos Mendes (Sr. Director of Data \& ML).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Lila Kapoor & Austin, USA (CT) & \href{mailto:lila.kapoor@alturasoft.example}{lila.kapoor@alturasoft.example} \\
+Team Lead & Pedro Álvarez & New York, USA (ET) & \href{mailto:pedro.alvarez@alturasoft.example}{pedro.alvarez@alturasoft.example} \\
+Principal Engineer & Dr. Wei Zhang & Toronto, CAN (ET) & \href{mailto:dr.zhang@alturasoft.example}{dr.zhang@alturasoft.example} \\
+Senior Engineer & Fatima Noor & London, UK (GMT) & \href{mailto:fatima.noor@alturasoft.example}{fatima.noor@alturasoft.example} \\
+Senior Engineer & Andrej Novak & Berlin, DE (CET) & \href{mailto:andrej.novak@alturasoft.example}{andrej.novak@alturasoft.example} \\
+Associate Engineer & Chloe Dubois & Dublin, IE (GMT) & \href{mailto:chloe.dubois@alturasoft.example}{chloe.dubois@alturasoft.example} \\
+Associate Engineer & Rashid Khan & Bengaluru, IN (IST) & \href{mailto:rashid.khan@alturasoft.example}{rashid.khan@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Cloud Infrastructure \& SRE}
+\textbf{Group Manager: Aisha Al-Hassan (Director of Cloud Infrastructure)}
+% ... All other sections (SRE, Security, QE, ProServ) would follow this same pattern ...
+
+\subsection{Infrastructure Engineering}
+\paragraph*{Specialization:} Cloud foundations for compute, storage, networking, CI/CD, and developer productivity.
+\paragraph*{Contacts:} Slack \#infra-eng \textbullet{} DL \href{mailto:infra-engineering@alturasoft.example}{infra-engineering@alturasoft.example} \textbullet{} Jira INFRA
+\paragraph*{Team Roster \& Reporting:}
+Manager Michael Lawson reports to Group Manager Aisha Al-Hassan (Director of Cloud Infrastructure).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Michael Lawson & Singapore (SGT) & \href{mailto:michael.lawson@alturasoft.example}{michael.lawson@alturasoft.example} \\
+Team Lead & Nandini Krishnan & San Francisco, USA (PT) & \href{mailto:nandini.krishnan@alturasoft.example}{nandini.krishnan@alturasoft.example} \\
+Principal Engineer & Joon Park & Austin, USA (CT) & \href{mailto:joon.park@alturasoft.example}{joon.park@alturasoft.example} \\
+Senior Engineer & Peter O’Neal & New York, USA (ET) & \href{mailto:peter.oneal@alturasoft.example}{peter.oneal@alturasoft.example} \\
+Senior Engineer & Samira Qureshi & Toronto, CAN (ET) & \href{mailto:samira.qureshi@alturasoft.example}{samira.qureshi@alturasoft.example} \\
+Associate Engineer & Victor Romero & London, UK (GMT) & \href{mailto:victor.romero@alturasoft.example}{victor.romero@alturasoft.example} \\
+Associate Engineer & Nadia Benali & Berlin, DE (CET) & \href{mailto:nadia.benali@alturasoft.example}{nadia.benali@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Site Reliability Engineering}
+\paragraph*{Specialization:} Reliability, incident management, capacity planning, and SLO governance across products.
+\paragraph*{Contacts:} Slack \#sre \textbullet{} DL \href{mailto:sre@alturasoft.example}{sre@alturasoft.example} \textbullet{} Jira SRE
+\paragraph*{Team Roster \& Reporting:}
+Manager Tatiana Smirnova reports to Group Manager Aisha Al-Hassan (Director of Cloud Infrastructure).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Tatiana Smirnova & Dublin, IE (GMT) & \href{mailto:tatiana.smirnova@alturasoft.example}{tatiana.smirnova@alturasoft.example} \\
+Team Lead & Daniel Adeyemi & Bengaluru, IN (IST) & \href{mailto:daniel.adeyemi@alturasoft.example}{daniel.adeyemi@alturasoft.example} \\
+Principal Engineer & Christopher Patel & Singapore (SGT) & \href{mailto:christopher.patel@alturasoft.example}{christopher.patel@alturasoft.example} \\
+Senior Engineer & Laura Nguyen & San Francisco, USA (PT) & \href{mailto:laura.nguyen@alturasoft.example}{laura.nguyen@alturasoft.example} \\
+Senior Engineer & José Perez & Austin, USA (CT) & \href{mailto:jose.perez@alturasoft.example}{jose.perez@alturasoft.example} \\
+Associate Engineer & Priyanka Ghosh & New York, USA (ET) & \href{mailto:priyanka.ghosh@alturasoft.example}{priyanka.ghosh@alturasoft.example} \\
+Associate Engineer & Aaron Levy & Toronto, CAN (ET) & \href{mailto:aaron.levy@alturasoft.example}{aaron.levy@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Security \& Compliance}
+\textbf{Group Manager: Thomas Gallagher (Director of Security \& Compliance)}
+
+\subsection{Application Security}
+\paragraph*{Specialization:} Secure SDLC, code scanning, threat modeling, and product security reviews.
+\paragraph*{Contacts:} Slack \#sec-appsec \textbullet{} DL \href{mailto:security-appsec@alturasoft.example}{security-appsec@alturasoft.example} \textbullet{} Jira SEC
+\paragraph*{Team Roster \& Reporting:}
+Manager George Blake reports to Group Manager Thomas Gallagher (Director of Security \& Compliance).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & George Blake & London, UK (GMT) & \href{mailto:george.blake@alturasoft.example}{george.blake@alturasoft.example} \\
+Team Lead & Noa Levi & Berlin, DE (CET) & \href{mailto:noa.levi@alturasoft.example}{noa.levi@alturasoft.example} \\
+Principal Engineer & Sergei Volkov & Dublin, IE (GMT) & \href{mailto:sergei.volkov@alturasoft.example}{sergei.volkov@alturasoft.example} \\
+Senior Engineer & Isabella Ferreira & Bengaluru, IN (IST) & \href{mailto:isabella.ferreira@alturasoft.example}{isabella.ferreira@alturasoft.example} \\
+Senior Engineer & Karthik Subramanian & Singapore (SGT) & \href{mailto:karthik.subramanian@alturasoft.example}{karthik.subramanian@alturasoft.example} \\
+Associate Engineer & Maya Stern & San Francisco, USA (PT) & \href{mailto:maya.stern@alturasoft.example}{maya.stern@alturasoft.example} \\
+Associate Engineer & Kevin Wu & Austin, USA (CT) & \href{mailto:kevin.wu@alturasoft.example}{kevin.wu@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cloud Security \& GRC}
+\paragraph*{Specialization:} Cloud posture, identity and access management, and governance/risk/compliance programs.
+\paragraph*{Contacts:} Slack \#sec-cloud-grc \textbullet{} DL \href{mailto:security-grc@alturasoft.example}{security-grc@alturasoft.example} \textbullet{} Jira GRC
+\paragraph*{Team Roster \& Reporting:}
+Manager Patricia Mbatha reports to Group Manager Thomas Gallagher (Director of Security \& Compliance).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Patricia Mbatha & New York, USA (ET) & \href{mailto:patricia.mbatha@alturasoft.example}{patricia.mbatha@alturasoft.example} \\
+Team Lead & Omar Youssef & Toronto, CAN (ET) & \href{mailto:omar.youssef@alturasoft.example}{omar.youssef@alturasoft.example} \\
+Principal Engineer & Helena Nowak & London, UK (GMT) & \href{mailto:helena.nowak@alturasoft.example}{helena.nowak@alturasoft.example} \\
+Senior Engineer & Daniel Rossi & Berlin, DE (CET) & \href{mailto:daniel.rossi@alturasoft.example}{daniel.rossi@alturasoft.example} \\
+Senior Engineer & Sofia Álvarez & Dublin, IE (GMT) & \href{mailto:sofia.alvarez@alturasoft.example}{sofia.alvarez@alturasoft.example} \\
+Associate Engineer & Minh Tran & Bengaluru, IN (IST) & \href{mailto:minh.tran@alturasoft.example}{minh.tran@alturasoft.example} \\
+Associate Engineer & Aisha Ali & Singapore (SGT) & \href{mailto:aisha.ali@alturasoft.example}{aisha.ali@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Quality Engineering}
+\textbf{Group Manager: Mei Lin (Director of Quality Engineering)}
+
+\subsection{Test Automation}
+\paragraph*{Specialization:} End-to-end test strategy, frameworks, and CI quality gates across product tiers.
+\paragraph*{Contacts:} Slack \#qe-automation \textbullet{} DL \href{mailto:qe-automation@alturasoft.example}{qe-automation@alturasoft.example} \textbullet{} Jira QE
+\paragraph*{Team Roster \& Reporting:}
+Manager Olivia Bennett reports to Group Manager Mei Lin (Director of Quality Engineering).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Olivia Bennett & San Francisco, USA (PT) & \href{mailto:olivia.bennett@alturasoft.example}{olivia.bennett@alturasoft.example} \\
+Team Lead & Rahul Mehta & Austin, USA (CT) & \href{mailto:rahul.mehta@alturasoft.example}{rahul.mehta@alturasoft.example} \\
+Principal Engineer & Alexandra Petrov & New York, USA (ET) & \href{mailto:alexandra.petrov@alturasoft.example}{alexandra.petrov@alturasoft.example} \\
+Senior Engineer & Brian Thompson & Toronto, CAN (ET) & \href{mailto:brian.thompson@alturasoft.example}{brian.thompson@alturasoft.example} \\
+Senior Engineer & Jieun Lee & London, UK (GMT) & \href{mailto:jieun.lee@alturasoft.example}{jieun.lee@alturasoft.example} \\
+Associate Engineer & Haruto Sato & Berlin, DE (CET) & \href{mailto:haruto.sato@alturasoft.example}{haruto.sato@alturasoft.example} \\
+Associate Engineer & Emily Nguyen & Dublin, IE (GMT) & \href{mailto:emily.nguyen@alturasoft.example}{emily.nguyen@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Performance \& Reliability Testing}
+\paragraph*{Specialization:} Capacity planning benchmarks, load/stress testing, and performance regression detection.
+\paragraph*{Contacts:} Slack \#qe-performance \textbullet{} DL \href{mailto:qe-performance@alturasoft.example}{qe-performance@alturasoft.example} \textbullet{} Jira PERF
+\paragraph*{Team Roster \& Reporting:}
+Manager Stefan Müller reports to Group Manager Mei Lin (Director of Quality Engineering).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Stefan Müller & Bengaluru, IN (IST) & \href{mailto:stefan.muller@alturasoft.example}{stefan.muller@alturasoft.example} \\
+Team Lead & Arjun Nair & Singapore (SGT) & \href{mailto:arjun.nair@alturasoft.example}{arjun.nair@alturasoft.example} \\
+Principal Engineer & Nina Kovács & San Francisco, USA (PT) & \href{mailto:nina.kovacs@alturasoft.example}{nina.kovacs@alturasoft.example} \\
+Senior Engineer & Giulio Bianchi & Austin, USA (CT) & \href{mailto:giulio.bianchi@alturasoft.example}{giulio.bianchi@alturasoft.example} \\
+Senior Engineer & Ahmed Khan & New York, USA (ET) & \href{mailto:ahmed.khan@alturasoft.example}{ahmed.khan@alturasoft.example} \\
+Associate Engineer & Mia Lopez & Toronto, CAN (ET) & \href{mailto:mia.lopez@alturasoft.example}{mia.lopez@alturasoft.example} \\
+Associate Engineer & Thabo Maseko & London, UK (GMT) & \href{mailto:thabo.maseko@alturasoft.example}{thabo.maseko@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Professional Services}
+\textbf{Group Manager: James Okoro (Sr. Director of Services)}
+
+\subsection{Solutions Engineering}
+\paragraph*{Specialization:} Pre-sales technical discovery, solution design, and prototyping for prospects.
+\paragraph*{Contacts:} Slack \#ps-solutions \textbullet{} DL \href{mailto:ps-solutions@alturasoft.example}{ps-solutions@alturasoft.example} \textbullet{} Jira SOL
+\paragraph*{Team Roster \& Reporting:}
+Manager Katherine Howell reports to Group Manager James Okoro (Sr. Director of Services).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Katherine Howell & Berlin, DE (CET) & \href{mailto:katherine.howell@alturasoft.example}{katherine.howell@alturasoft.example} \\
+Team Lead & Ilya Kuznetsov & Dublin, IE (GMT) & \href{mailto:ilya.kuznetsov@alturasoft.example}{ilya.kuznetsov@alturasoft.example} \\
+Principal Engineer & Sunil Narayanan & Bengaluru, IN (IST) & \href{mailto:sunil.narayanan@alturasoft.example}{sunil.narayanan@alturasoft.example} \\
+Senior Engineer & Joanna Nowak & Singapore (SGT) & \href{mailto:joanna.nowak@alturasoft.example}{joanna.nowak@alturasoft.example} \\
+Senior Engineer & Lucas Pereira & San Francisco, USA (PT) & \href{mailto:lucas.pereira@alturasoft.example}{lucas.pereira@alturasoft.example} \\
+Associate Engineer & Noor Al-Farsi & Austin, USA (CT) & \href{mailto:noor.al-farsi@alturasoft.example}{noor.al-farsi@alturasoft.example} \\
+Associate Engineer & Blake Johnson & New York, USA (ET) & \href{mailto:blake.johnson@alturasoft.example}{blake.johnson@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Customer Implementations}
+\paragraph*{Specialization:} Statement-of-Work implementations, integrations, and customer onboarding to Altura Cloud.
+\paragraph*{Contacts:} Slack \#ps-implementations \textbullet{} DL \href{mailto:ps-implementations@alturasoft.example}{ps-implementations@alturasoft.example} \textbullet{} Jira IMPL
+\paragraph*{Team Roster \& Reporting:}
+Manager Ahmed Rahman reports to Group Manager James Okoro (Sr. Director of Services).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Ahmed Rahman & Toronto, CAN (ET) & \href{mailto:ahmed.rahman@alturasoft.example}{ahmed.rahman@alturasoft.example} \\
+Team Lead & Veronica García & London, UK (GMT) & \href{mailto:veronica.garcia@alturasoft.example}{veronica.garcia@alturasoft.example} \\
+Principal Engineer & Patrick O’Dwyer & Berlin, DE (CET) & \href{mailto:patrick.odwyer@alturasoft.example}{patrick.odwyer@alturasoft.example} \\
+Senior Engineer & Chen Li & Dublin, IE (GMT) & \href{mailto:chen.li@alturasoft.example}{chen.li@alturasoft.example} \\
+Senior Engineer & Zainab Hussain & Bengaluru, IN (IST) & \href{mailto:zainab.hussain@alturasoft.example}{zainab.hussain@alturasoft.example} \\
+Associate Engineer & Tomasz Wójcik & Singapore (SGT) & \href{mailto:tomasz.wojcik@alturasoft.example}{tomasz.wojcik@alturasoft.example} \\
+Associate Engineer & Elena Petrova & San Francisco, USA (PT) & \href{mailto:elena.petrova@alturasoft.example}{elena.petrova@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Managed Services (SRE-as-a-Service)}
+\paragraph*{Specialization:} Tiered production support, change management, and run operations for premium customers.
+\paragraph*{Contacts:} Slack \#ps-managed-services \textbullet{} DL \href{mailto:ps-managed@alturasoft.example}{ps-managed@alturasoft.example} \textbullet{} Jira MSVC
+\paragraph*{Team Roster \& Reporting:}
+Manager Roberto Santoro reports to Group Manager James Okoro (Sr. Director of Services).
+\begin{table}[h!]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Role} & \textbf{Name} & \textbf{Location} & \textbf{Email} \\
+\midrule
+Manager & Roberto Santoro & Austin, USA (CT) & \href{mailto:roberto.santoro@alturasoft.example}{roberto.santoro@alturasoft.example} \\
+Team Lead & Grace Okafor & New York, USA (ET) & \href{mailto:grace.okafor@alturasoft.example}{grace.okafor@alturasoft.example} \\
+Principal Engineer & Dmitry Smirnov & Toronto, CAN (ET) & \href{mailto:dmitry.smirnov@alturasoft.example}{dmitry.smirnov@alturasoft.example} \\
+Senior Engineer & Wei Liu & London, UK (GMT) & \href{mailto:wei.liu@alturasoft.example}{wei.liu@alturasoft.example} \\
+Senior Engineer & Carolina Morales & Berlin, DE (CET) & \href{mailto:carolina.morales@alturasoft.example}{carolina.morales@alturasoft.example} \\
+Associate Engineer & Adam Kowalczyk & Dublin, IE (GMT) & \href{mailto:adam.kowalczyk@alturasoft.example}{adam.kowalczyk@alturasoft.example} \\
+Associate Engineer & Layla Haddad & Bengaluru, IN (IST) & \href{mailto:layla.haddad@alturasoft.example}{layla.haddad@alturasoft.example} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\section*{Engineering Practices \& Standards}
+We practice agile delivery with two-week sprints, trunk-based development, and mandatory code review (2 approvals). DORA metrics are tracked across teams; services must pass production-readiness reviews before launch.
+
+\paragraph*{Definition of Done:} Code + tests + docs; SLOs defined; dashboards \& alerts; runbooks; rollback plan; security review.
+\paragraph*{Branching \& CI/CD:} Trunk-based with short-lived feature branches; CI gates for tests/security/coverage; canary and progressive delivery.
+\paragraph*{Observability:} Standardized RED/USE dashboards; SLO/error budgets enforced via SRE review.
+\paragraph*{Data Governance:} Data classification, lineage, and PII handling policies; PR checks for schema changes.
+
+\section*{Career Framework (Engineering)}
+\paragraph*{Individual Contributor (IC) levels and typical scope:}
+\begin{itemize}
+    \item Associate Engineer (IC1): Learns codebase; delivers small, well-defined tasks with mentorship.
+    \item Software Engineer (IC2): Owns small features; contributes to reviews and test quality.
+    \item Senior Engineer (IC3): Leads features; mentors; designs within a service boundary.
+    \item Staff/Principal Engineer (IC4-IC5): Cross-team design; sets standards; deep domain leadership.
+    \item Distinguished/Architect (IC6): Broad, company-wide technical strategy.
+\end{itemize}
+\paragraph*{Management levels:} Manager (M1), Sr. Manager (M2), Group Manager/Director (D1+).
+
+\section*{Appendix: Distribution Lists, Jira Keys, Slack Channels}
+\textbf{Product Engineering}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Core Platform: DL \href{mailto:eng-core-platform@alturasoft.example}{eng-core-platform@alturasoft.example} \textbullet{} Slack \#eng-core-platform \textbullet{} Jira PLAT
+    \item API \& Integrations: DL \href{mailto:eng-api@alturasoft.example}{eng-api@alturasoft.example} \textbullet{} Slack \#eng-api \textbullet{} Jira API
+    \item Web \& Mobile Apps: DL \href{mailto:app-web-mobile@alturasoft.example}{app-web-mobile@alturasoft.example} \textbullet{} Slack \#app-web-mobile \textbullet{} Jira APP
+\end{itemize}
+
+\textbf{Data \& Machine Learning}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Data Platform: DL \href{mailto:data-platform@alturasoft.example}{data-platform@alturasoft.example} \textbullet{} Slack \#data-platform \textbullet{} Jira DATA
+    \item Analytics \& ML: DL \href{mailto:ml-analytics@alturasoft.example}{ml-analytics@alturasoft.example} \textbullet{} Slack \#ml-analytics \textbullet{} Jira ML
+\end{itemize}
+
+\textbf{Cloud Infrastructure \& SRE}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Infrastructure Engineering: DL \href{mailto:infra-engineering@alturasoft.example}{infra-engineering@alturasoft.example} \textbullet{} Slack \#infra-eng \textbullet{} Jira INFRA
+    \item Site Reliability Engineering: DL \href{mailto:sre@alturasoft.example}{sre@alturasoft.example} \textbullet{} Slack \#sre \textbullet{} Jira SRE
+\end{itemize}
+
+\textbf{Security \& Compliance}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Application Security: DL \href{mailto:security-appsec@alturasoft.example}{security-appsec@alturasoft.example} \textbullet{} Slack \#sec-appsec \textbullet{} Jira SEC
+    \item Cloud Security \& GRC: DL \href{mailto:security-grc@alturasoft.example}{security-grc@alturasoft.example} \textbullet{} Slack \#sec-cloud-grc \textbullet{} Jira GRC
+\end{itemize}
+
+\textbf{Quality Engineering}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Test Automation: DL \href{mailto:qe-automation@alturasoft.example}{qe-automation@alturasoft.example} \textbullet{} Slack \#qe-automation \textbullet{} Jira QE
+    \item Performance \& Reliability Testing: DL \href{mailto:qe-performance@alturasoft.example}{qe-performance@alturasoft.example} \textbullet{} Slack \#qe-performance \textbullet{} Jira PERF
+\end{itemize}
+
+\textbf{Professional Services}
+\begin{itemize}[leftmargin=*, label={}]
+    \item Solutions Engineering: DL \href{mailto:ps-solutions@alturasoft.example}{ps-solutions@alturasoft.example} \textbullet{} Slack \#ps-solutions \textbullet{} Jira SOL
+    \item Customer Implementations: DL \href{mailto:ps-implementations@alturasoft.example}{ps-implementations@alturasoft.example} \textbullet{} Slack \#ps-implementations \textbullet{} Jira IMPL
+    \item Managed Services (SRE-as-a-Service): DL \href{mailto:ps-managed@alturasoft.example}{ps-managed@alturasoft.example} \textbullet{} Slack \#ps-managed-services \textbullet{} Jira MSVC
+\end{itemize}
+
+\vfill
+\textit{Note: This document and all names are fictional and provided solely for onboarding tooling demonstrations.}
+
+\end{document}

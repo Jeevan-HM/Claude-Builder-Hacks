@@ -1,0 +1,104 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- ROBUST PREAMBLE BLOCK ---
+% Use standard packages for robust compilation without specific fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% Set up Babel for language handling. 'english' is the primary.
+\usepackage[english]{babel}
+
+% Use standard packages for lists and tables
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Document Info
+\title{
+    Customer Requirements Document \\
+    \vspace{0.5cm}
+    \textbf{Project: Changelogify} \\
+    \large Automated Release Note Generator
+}
+\author{Veridian Dynamics (Client)}
+\date{\today}
+
+% --- DOCUMENT BODY ---
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % No page number on the title page
+\clearpage
+
+\section*{1. Project Overview}
+This document outlines the business and technical requirements for "Project Changelogify." This internal tool will automate the tedious process of compiling release notes (changelogs) for our software projects.
+
+The system will work by integrating with our source control (GitHub) and task tracking (Jira) systems. It will scan for completed work within a given release period, parse the information based on defined conventions, and generate a draft of release notes for review and publication.
+
+\section*{2. Business Objective}
+The primary objective of Project Changelogify is to dramatically reduce the manual effort required by developers and release managers to create changelogs. By automating this, we aim to:
+\begin{itemize}
+    \item Save significant developer-hours currently spent on manual documentation.
+    \item Ensure all user-facing changes (new features, bug fixes) are consistently documented.
+    \item Improve the accuracy and professionalism of our release communications.
+    \item Enable faster, more frequent release cycles by removing a common bottleneck.
+\end{itemize}
+
+\section*{3. Key Features}
+The platform will be delivered with the following core features:
+
+\begin{enumerate}
+    \item \textbf{Secure Authentication:} Users (Release Managers, Developers) must log in via our company's SSO (Single Sign-On) system.
+    
+    \item \textbf{Project Configuration:} An admin interface to "link" a new project. This must store:
+    \begin{itemize}
+        \item The GitHub repository API path.
+        \item The associated Jira Project key.
+        \item API credentials for both services.
+    \end{itemize}
+    
+    \item \textbf{Release Definition:} A user must be able to define a "release" by selecting a "start" and "end" reference (e.g., Git tag `v1.1.0` and `v1.2.0`, or two commit SHAs).
+    
+    \item \textbf{Automated Data Aggregation:} A backend process that, when triggered:
+    \begin{itemize}
+        \item Fetches all Git commit messages between the two release references.
+        \item Parses commits based on the \textbf{Conventional Commits standard} (e.g., `feat:`, `fix:`, `docs:`).
+        \item Extracts Jira ticket numbers (e.g., `PROJ-123`) from the commit messages.
+        \item Queries the Jira API to get the official title for each ticket.
+    \end{itemize}
+    
+    \item \textbf{Draft Editor UI:} A web interface that presents the generated draft, grouped by type (e.g., "New Features," "Bug Fixes"). Users must be able to edit this text before saving.
+\end{enumerate}
+
+\section*{4. Core Technology Requirements}
+To ensure maintainability and compatibility with our existing infrastructure, the solution \textbf{must} adhere to the following technology stack. This is the same stack required for Project CodePulse, and all new internal tools should conform to this standard.
+
+\begin{itemize}
+    \item \textbf{Frontend:} The user interface \textbf{must} be a single-page application (SPA) built with \textbf{React.js} (v18 or later).
+    
+    \item \textbf{Backend:} All backend services \textbf{must} be written in \textbf{Python} (v3.10 or later) using the \textbf{FastAPI} framework.
+    
+    \item \textbf{API:} All communication between the frontend and backend \textbf{must} be via a secure, stateless \textbf{RESTful API} using JSON.
+    
+    \item \textbf{Database:} The primary data store for project configurations and saved release notes \textbf{must} be \textbf{PostgreSQL} (v15 or later).
+\end{itemize}
+
+\section*{5. Acceptance Criteria (User Stories)}
+The initial delivery will be considered complete when the following user stories are demonstrable:
+
+\begin{itemize}
+    \item \textbf{Login:} "As a Release Manager, I can log in to the Changelogify dashboard using my company SSO credentials."
+    
+    \item \textbf{Project Setup:} "As an Administrator, I can create a new 'Product' in the UI and securely provide its GitHub repo URL and Jira project key."
+    
+    \item \textbf{Generation Trigger:} "As a Release Manager, I can select my project, choose a 'start' tag (e.g., `v2.1.0`) and an 'end' tag (e.g., `v2.2.0`), and click 'Generate Draft'."
+    
+    \item \textbf{Parsing Logic (Features):} "As a Release Manager, when I generate a draft, I can see a 'New Features' section that lists the titles of all Jira tickets associated with commits prefixed with `feat:`."
+    
+    \item \textbf{Parsing Logic (Fixes):} "As a Release Manager, when I generate a draft, I can see a 'Bug Fixes' section that lists the titles of all Jira tickets associated with commits prefixed with `fix:`."
+
+    \item \textbf{Editing:} "As a Release Manager, I can click into the generated text in the UI, manually add a new bullet point, and save my changes to the database."
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,101 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- ROBUST PREAMBLE BLOCK ---
+% Use standard packages for robust compilation without specific fonts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+
+% Set up Babel for language handling. 'english' is the primary.
+\usepackage[english]{babel}
+
+% Use standard packages for lists and tables
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% Document Info
+\title{
+    Customer Requirements Document \\
+    \vspace{0.5cm}
+    \textbf{Project: CodePulse} \\
+    \large Engineering Metrics Dashboard
+}
+\author{Veridian Dynamics (Client)}
+\date{\today}
+
+% --- DOCUMENT BODY ---
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % No page number on the title page
+\clearpage
+
+\section*{1. Project Overview}
+This document outlines the business and technical requirements for "Project CodePulse." This will be an internal web application designed to provide Engineering Managers and Leadership with actionable, real-time insights into the software development lifecycle (SDLC).
+
+The system will function by integrating with our existing development tools (source control, task management) via their APIs. It will aggregate this data and present it in a clear, consolidated, and web-based dashboard.
+
+\section*{2. Business Objective}
+The primary objective of Project CodePulse is to replace manual data collection and subjective reporting with an automated, data-driven platform. By visualizing key performance indicators (KPIs), we aim to:
+\begin{itemize}
+    \item Identify and address bottlenecks in the development process.
+    \item Improve development velocity and deployment frequency.
+    \item Provide Engineering Managers with objective data to support their teams.
+    \item Track performance against engineering goals and standards.
+\end{itemize}
+
+\section*{3. Key Features}
+The platform will be delivered with the following core features:
+
+\begin{enumerate}
+    \item \textbf{Secure Authentication:} Users (Engineering Managers) must log in via our company's SSO (Single Sign-On) system.
+    
+    \item \textbf{API Integration Module:} A secure, backend-only module for connecting to third-party services.
+    \begin{itemize}
+        \item Must support integration with our \textbf{GitHub Enterprise} instance.
+        \item Must support integration with our \textbf{Jira Cloud} instance.
+    \end{itemize}
+    
+    \item \textbf{Metrics Dashboard:} The primary user interface. This dashboard must display, at minimum, the following widgets for a selected team or repository:
+    \begin{itemize}
+        \item \textbf{Pull Request (PR) Cycle Time:} Average time from PR creation to merge.
+        \item \textbf{Code Churn:} Amount of code that is rewritten or deleted shortly after being committed.
+        \item \textbf{Deployment Frequency:} Number of deployments to production over time.
+        \item \textbf{Task Throughput:} Number of Jira tickets (Stories, Bugs) moved to "Done" per week.
+    \end{itemize}
+    
+    \item \textbf{Team Management:} A simple interface for administrators to define "Teams" by mapping repository/repositories and Jira projects to a single group.
+\end{enumerate}
+
+\section*{4. Core Technology Requirements}
+To ensure maintainability and compatibility with our existing infrastructure, the solution \textbf{must} adhere to the following technology stack. Non-compliance is not an option without a formal review and exemption.
+
+\begin{itemize}
+    \item \textbf{Frontend:} The user interface \textbf{must} be a single-page application (SPA) built with \textbf{React.js} (v18 or later).
+    
+    \item \textbf{Backend:} All backend services \textbf{must} be written in \textbf{Python} (v3.10 or later) using the \textbf{FastAPI} framework.
+    
+    \item \textbf{API:} All communication between the frontend and backend \textbf{must} be via a secure, stateless \textbf{RESTful API} using JSON.
+    
+    \item \textbf{Database:} The primary data store for user data, team configurations, and aggregated metrics \textbf{must} be \textbf{PostgreSQL} (v15 or later).
+\end{itemize}
+
+\section*{5. Acceptance Criteria (User Stories)}
+The initial delivery will be considered complete when the following user stories are demonstrable:
+
+\begin{itemize}
+    \item \textbf{Login:} "As an Engineering Manager, I can log in to the CodePulse dashboard using my company SSO credentials."
+    
+    \item \textbf{API Connection:} "As an Administrator, I can securely add our GitHub Enterprise API token and Jira API token to the system's backend configuration."
+    
+    \item \textbf{Team Setup:} "As an Administrator, I can create a new 'Team' and associate it with one or more GitHub repositories and a specific Jira project."
+    
+    \item \textbf{PR Metric:} "As an Engineering Manager, I can view a dashboard widget that shows the average PR Cycle Time for my team over the last 30 days."
+    
+    \item \textbf{Task Metric:} "As an Engineering Manager, I can view a line chart showing the total number of story points completed by my team, grouped by week."
+        
+    \item \textbf{Deployment Metric:} "As an Engineering Manager, I can view a bar chart showing the total number of deployments to production for my team's primary service, grouped by week."
+\end{itemize}
+
+\end{document}

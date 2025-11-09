@@ -1,0 +1,92 @@
+\documentclass[11pt, a4paper]{article}
+
+% --- STANDARD PREAMBLE BLOCK ---
+\usepackage[a4paper, top=2.5cm, bottom=2.5cm, left=2cm, right=2cm]{geometry}
+\usepackage[utf8]{inputenc} % Handle UTF-8 input
+\usepackage[T1]{fontenc}    % Use modern font encoding
+
+% --- Additional Packages ---
+\usepackage{parskip}    % Use spacing between paragraphs, not indentation
+\usepackage{booktabs}   % For professional tables
+\usepackage{enumitem}   % For list customization
+\usepackage{titling}    % To customize title
+\usepackage{url}        % For \url{} command, needed for links
+\usepackage[hidelinks]{hyperref} % For links, must be last
+
+% --- Title & Author ---
+\title{Customer Requirements Document \\ VocaLift}
+\author{Project Stakeholder}
+\date{\today}
+
+% --- Document Start ---
+\begin{document}
+
+\maketitle
+
+\section{Project Overview \& Business Requirements}
+
+\subsection{Core Business Objective}
+VocaLift is a full-stack web application designed to serve as an interactive, self-service tool for language acquisition. The primary business goal is to provide users with an engaging platform to learn new languages by translating text, hearing correct pronunciation, and reinforcing their learning through automated quizzes.
+
+\subsection{Target Audience}
+\begin{itemize}
+    \item Casual language learners seeking to build vocabulary.
+    \item Students needing a tool to practice pronunciation and spelling.
+    \item Travelers wanting to learn key phrases before a trip.
+\end{itemize}
+
+\subsection{Key Features \& Customer Expectations}
+The application must meet the following functional requirements:
+
+\begin{enumerate}
+    \item \textbf{User Authentication:} Customers expect a secure and persistent login experience.
+    \begin{itemize}
+        \item Must support secure new user registration.
+        \item Must support secure login for existing users.
+        \item User sessions must be persistent (i.e., user stays logged in).
+    \end{itemize}
+    
+    \item \textbf{Text Translation:} This is the core feature of the application.
+    \begin{itemize}
+        \item Users must be able to input English text.
+        \item Users must be able to select a target language from a predefined list.
+        \item The application must return an accurate translation of the input text.
+    \end{itemize}
+    
+    \item \textbf{Text-to-Speech (TTS):} This is critical for the learning component.
+    \begin{itemize}
+        \item Users must be able to click an icon or button to hear an audio pronunciation of the \textit{translated} text.
+        \item The audio must be clear and in the correct accent for the target language.
+    \end{itemize}
+    
+    \item \textbf{Practice \& Reinforcement:}
+    \begin{itemize}
+        \item The application must provide a "Practice Quiz" feature.
+        \item The system must automatically generate multiple-choice questions (MCQs) based on the user's previously translated words.
+    \end{itemize}
+
+    \item \textbf{Progress Tracking:}
+    \begin{itemize}
+        \item The application must provide a user-facing dashboard.
+        \item The dashboard is expected to show user statistics, such as the number of saved words and recent quiz scores, to help users track their learning progress.
+    \end{itemize}
+\end{enumerate}
+
+\section{Acceptance Criteria}
+The project will be considered successful when the following user stories are met:
+
+\begin{enumerate}
+    \item \textbf{User Registration:} As a new user, I can create a new account, after which I am prompted to log in.
+    
+    \item \textbf{User Login:} As an existing user, I can log in with my credentials and am taken to the main application page. My session is saved, so I do not have to log in again if I close the browser tab.
+    
+    \item \textbf{Translation:} As a logged-in user, I can type "Hello", select "French" from a dropdown, click "Translate", and see the word "Bonjour" appear.
+    
+    \item \textbf{Audio Playback:} As a logged-in user, after translating "Hello" to "Bonjour", I can click a speaker icon and hear a clear audio pronunciation of "Bonjour".
+    
+    \item \textbf{Quiz Generation:} As a user who has translated several words, I can navigate to the "Practice Quiz" section and be presented with a multiple-choice quiz that tests me on those words.
+    
+    \item \textbf{Progress:} As a user, I can navigate to my "Dashboard" and see an accurate count of my saved words and my score from the last quiz I took.
+\end{enumerate}
+
+\end{document}
